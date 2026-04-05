@@ -7,21 +7,54 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body class="quiz-body">
-  {% if quiz_session %}
-    <h1>Quiz started!</h1>
-    <p class="subtitle">Quiz session is ready.</p>
-    <div class="info-box">
-      <div class="number">{{ quiz_session.questions | length }}</div>
-      <div class="label">question{{ 's' if quiz_session.questions | length != 1 else '' }} in this session</div>
+
+  <div class="progress-header">
+    <span class="question-counter">Question {{ index + 1 }} of {{ total }}</span>
+  </div>
+
+  <p class="question-text">{{ question.question }}</p>
+
+  <form method="post" action="{{ url_for('quiz_question', index=index) }}">
+    <div class="answer-list">
+      {% for answer in question.answers %}
+        <label class="answer-card{% if loop.index0 in selected_answers %} selected{% endif %}">
+          {% if question.question_type == 'single-choice' %}
+            <input type="radio" name="answer_indices" value="{{ loop.index0 }}"
+              {% if loop.index0 in selected_answers %}checked{% endif %}
+              onchange="selectRadio(this)" />
+          {% else %}
+            <input type="checkbox" name="answer_indices" value="{{ loop.index0 }}"
+              {% if loop.index0 in selected_answers %}checked{% endif %}
+              onchange="selectCheckbox(this)" />
+          {% endif %}
+          <span class="answer-text">{{ answer.text }}</span>
+        </label>
+      {% endfor %}
     </div>
-    <div class="placeholder">
-      Placeholder for the quiz interface.
+
+    <div class="quiz-nav">
+      {% if index > 0 %}
+        <button type="submit" class="btn" name="previous_button">&#8592; Previous</button>
+      {% else %}
+        <span></span>
+      {% endif %}
+      {% if index == total - 1 %}
+        <button type="submit" class="btn" name="finish_button">Finish &#8594;</button>
+      {% else %}
+        <button type="submit" class="btn" name="next_button">Next &#8594;</button>
+      {% endif %}
     </div>
-    <a class="btn" href="{{ url_for('home') }}">&#8592; Back to question selection</a>
-  {% else %}
-    <h1 class="error">No active quiz found.</h1>
-    <p class="subtitle">Session expired or no quiz was started.</p>
-    <a class="btn" href="{{ url_for('home') }}">&#8592; Back to question selection</a>
-  {% endif %}
+  </form>
+
+  <script>
+    function selectCheckbox(checkbox) {
+      checkbox.closest('.answer-card').classList.toggle('selected', checkbox.checked);
+    }
+    function selectRadio(radio) {
+      radio.closest('form').querySelectorAll('.answer-card').forEach(el => el.classList.remove('selected'));
+      radio.closest('.answer-card').classList.add('selected');
+    }
+  </script>
+
 </body>
 </html>

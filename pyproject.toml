@@ -4,8 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quizzer"
-version = "0.1.0"
+version = "0.2.0"
 readme = "README.md"
+description = "Simple, extensible quiz application for self-study and examp preparation."
 requires-python = ">=3.12"
 dependencies = [
     "flask>=3.1.0",

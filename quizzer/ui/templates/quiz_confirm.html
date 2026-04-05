@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quizzer — End of Quiz</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="quiz-body">
+
+  <h1>End of the quiz</h1>
+  <p class="subtitle">Do you want to finish?</p>
+
+  <div class="confirm-stats">
+    <div class="stat-card">
+      <span class="stat-number">{{ n_answered }}</span>
+      <span class="stat-label">answered</span>
+    </div>
+    <div class="stat-card stat-card--skipped">
+      <span class="stat-number">{{ n_skipped }}</span>
+      <span class="stat-label">skipped</span>
+    </div>
+    <div class="stat-card stat-card--unanswered">
+      <span class="stat-number">{{ total - n_answered - n_skipped }}</span>
+      <span class="stat-label">unanswered</span>
+    </div>
+  </div>
+
+  <div class="quiz-nav quiz-nav--centered">
+    <a class="btn" href="{{ url_for('quiz_question', index=last_index) }}">&#8592; Back to last question</a>
+    <form method="post" action="{{ url_for('quiz_confirm') }}" style="display:inline;">
+      <button type="submit" class="btn">Finish Quiz</button>
+    </form>
+  </div>
+
+</body>
+</html>

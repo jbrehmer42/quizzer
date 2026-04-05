@@ -25,7 +25,7 @@
           <input type="checkbox" name="question_ids" value="{{ q.id_ }}"
                  onchange="onToggle(this, 'card-{{ loop.index }}')" />
           <div class="question-body">
-            <p class="question-text">{{ q.question }}</p>
+            <p class="question-text-preview">{{ q.question }}</p>
             <div class="question-meta">
               <span class="badge">{{ q.question_type }}</span>
             </div>
