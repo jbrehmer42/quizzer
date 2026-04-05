@@ -4,21 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quizzer — Quiz</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 4rem auto; padding: 0 1rem; color: #1a1a2e; text-align: center; }
-    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-    .subtitle { color: #555; font-size: 1.05rem; margin-bottom: 2rem; }
-    .info-box { border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; background: #f9fafb; margin-bottom: 2rem; display: inline-block; min-width: 280px; }
-    .info-box .number { font-size: 3rem; font-weight: 700; color: #4a7cdc; line-height: 1; }
-    .info-box .label { font-size: 0.9rem; color: #666; margin-top: 0.25rem; }
-    .placeholder { color: #888; font-size: 0.9rem; border: 2px dashed #ccc; border-radius: 8px; padding: 2rem 1.5rem; margin-bottom: 2rem; }
-    a.btn { display: inline-block; padding: 0.6rem 1.4rem; background: #4a7cdc; color: #fff; text-decoration: none; border-radius: 5px; font-weight: 600; font-size: 0.95rem; }
-    a.btn:hover { background: #3a6acc; }
-    .error { color: #c0392b; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
+<body class="quiz-body">
   {% if quiz_session %}
     <h1>Quiz started!</h1>
     <p class="subtitle">Quiz session is ready.</p>

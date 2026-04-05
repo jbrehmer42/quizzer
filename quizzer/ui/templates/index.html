@@ -4,32 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quizzer — Select Questions</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1a1a2e; }
-    h1 { margin-bottom: 0.25rem; }
-    .subtitle { color: #555; margin-bottom: 1.5rem; }
-    .controls { display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: center; }
-    .controls button { padding: 0.35rem 0.8rem; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; background: #f5f5f5; font-size: 0.875rem; }
-    .controls button:hover { background: #e8e8e8; }
-    .selected-count { margin-left: auto; font-size: 0.875rem; color: #555; }
-    .question-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
-    .question-card { border: 1px solid #ddd; border-radius: 6px; padding: 0.9rem 1rem; display: flex; gap: 0.75rem; align-items: flex-start; cursor: pointer; transition: background 0.1s, border-color 0.1s; }
-    .question-card:hover { background: #f9f9f9; }
-    .question-card.selected { border-color: #4a7cdc; background: #eef3fd; }
-    .question-card input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; accent-color: #4a7cdc; width: 16px; height: 16px; cursor: pointer; }
-    .question-body { flex: 1; min-width: 0; }
-    .question-text { font-size: 0.95rem; line-height: 1.5; margin: 0 0 0.4rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .question-meta { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
-    .badge { font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 99px; background: #e4e9f0; color: #444; }
-    .empty { color: #888; margin-top: 2rem; }
-    .start-bar { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e0e0e0; padding: 0.85rem 0; margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center; }
-    .btn-start { padding: 0.6rem 1.6rem; background: #4a7cdc; color: #fff; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; font-weight: 600; }
-    .btn-start:disabled { background: #a0b8e8; cursor: not-allowed; }
-    .btn-start:not(:disabled):hover { background: #3a6acc; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
+<body class="index-body">
   <h1>Quizzer</h1>
   <p class="subtitle">Select the questions you want to include in your quiz, then click <strong>Start Quiz</strong>.</p>
 
@@ -60,7 +37,7 @@
 
     <div class="start-bar">
       <button type="submit" class="btn-start" id="start-btn" disabled>Start Quiz</button>
-      <span id="start-label" style="font-size:0.875rem;color:#555;">Select at least one question to start.</span>
+      <span id="start-label" class="start-label">Select at least one question to start.</span>
     </div>
   </form>
 
