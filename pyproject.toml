@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quizzer"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1.0",
+    "uvicorn>=0.35.0",
+]
+
+[project.scripts]
+quizzer = "quizzer.main:main"
+
+[tool.setuptools]
+py-modules = ["quizzer"]
