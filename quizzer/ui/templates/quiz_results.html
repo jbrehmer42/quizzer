@@ -21,7 +21,10 @@
     </div>
   </div>
 
-  <a class="btn" href="{{ url_for('home') }}">&#8592; Back to question selection</a>
+  <div class="results-actions">
+    <a class="btn" href="{{ url_for('quiz_review', index=0) }}">Review answers &#8594;</a>
+    <a class="btn btn--secondary" href="{{ url_for('home') }}">&#8592; Back to question selection</a>
+  </div>
 
 </body>
 </html>

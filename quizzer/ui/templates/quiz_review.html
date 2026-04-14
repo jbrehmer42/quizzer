@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quizzer — Review</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="quiz-body">
+
+  <div class="progress-header">
+    <span class="question-counter">Question {{ index + 1 }} of {{ total }}</span>
+  </div>
+
+  <p class="question-text">{{ question.question }}</p>
+
+  <div class="answer-list">
+    {% for answer in question.answers %}
+      {% set is_selected = loop.index0 in selected_answers %}
+      <div class="answer-card answer-card--review
+        {%- if answer.correct and is_selected %} answer-card--correct
+        {%- elif answer.correct %} answer-card--missed
+        {%- elif is_selected %} answer-card--wrong
+        {%- endif %}">
+        <span class="answer-icon">
+          {%- if answer.correct -%}&#10003;
+          {%- elif is_selected -%}&#10007;
+          {%- else -%}&nbsp;{%- endif -%}
+        </span>
+        <div class="answer-body">
+          <span class="answer-text">{{ answer.text }}</span>
+          {% if answer.rationale %}
+            <p class="answer-rationale">{{ answer.rationale }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if question.explanation %}
+    <div class="question-explanation">
+      <strong>Explanation</strong>
+      <p>{{ question.explanation }}</p>
+    </div>
+  {% endif %}
+
+  <div class="quiz-nav">
+    {% if index > 0 %}
+      <a class="btn" href="{{ url_for('quiz_review', index=index - 1) }}">&#8592; Previous</a>
+    {% else %}
+      <a class="btn" href="{{ url_for('quiz_results') }}">&#8592; Results</a>
+    {% endif %}
+    {% if index == total - 1 %}
+      <a class="btn" href="{{ url_for('quiz_results') }}">Results &#8594;</a>
+    {% else %}
+      <a class="btn" href="{{ url_for('quiz_review', index=index + 1) }}">Next &#8594;</a>
+    {% endif %}
+  </div>
+
+</body>
+</html>
