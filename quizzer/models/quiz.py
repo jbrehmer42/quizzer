@@ -7,9 +7,19 @@ from quizzer.models.questions import ChoiceQuestion
 
 
 class QuestionStatus(Enum):
+    """Possible question status during the quiz session"""
+
     UNANSWERED = "unanswered"
     ANSWERED = "answered"
     SKIPPED = "skipped"
+
+
+class QuestionOutcome(Enum):
+    """Possible question outcomes after the quiz session is completed"""
+
+    CORRECT = "correct"
+    WRONG = "wrong"
+    UNANSWERED = "unanswered"
 
 
 class QuizSession:
@@ -73,3 +83,14 @@ class QuizSession:
             correct = [answer.text for answer in question.answers if answer.correct]
             sum_correct += set(selected) == set(correct)
         return sum_correct, len(answered)
+
+    def get_question_outcome_by_index(self, index: int) -> QuestionOutcome:
+        """Return the QuestionOutcome for the question at the given index."""
+        question = self.get_question_by_index(index)
+        status = self.question_status[question.id_]
+        if status == QuestionStatus.UNANSWERED or status == QuestionStatus.SKIPPED:
+            return QuestionOutcome.UNANSWERED
+        else:
+            selected =  [question.answers[i].text for i in self._selected_answers[question.id_]]
+            correct = [answer.text for answer in question.answers if answer.correct]
+            return QuestionOutcome.CORRECT if set(selected) == set(correct) else QuestionOutcome.WRONG

@@ -122,12 +122,19 @@ def quiz_results():
 
     correct, answered = quiz_session.score()
     total = quiz_session.total_questions
+
+    question_outcomes = [
+        {"index": i, "text": question.question, "outcome": quiz_session.get_question_outcome_by_index(i).value}
+        for i, question in enumerate(quiz_session.questions)
+    ]
+
     return render_template(
         "quiz_results.html",
         correct=correct,
         answered=answered,
         total=total,
         skipped=total - answered,
+        question_outcomes=question_outcomes,
     )
 
 

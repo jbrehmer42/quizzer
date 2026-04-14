@@ -26,5 +26,22 @@
     <a class="btn btn--secondary" href="{{ url_for('home') }}">&#8592; Back to question selection</a>
   </div>
 
+  <div class="results-question-overview">
+    <h2 class="results-overview-heading">Questions</h2>
+    <ul class="question-list">
+      {% for q in question_outcomes %}
+      <li>
+        <a class="question-card question-card--outcome question-card--{{ q.outcome }}"
+           href="{{ url_for('quiz_review', index=q.index) }}">
+          <span class="question-index-badge">{{ q.index + 1 }}</span>
+          <div class="question-body">
+            <p class="question-text-preview">{{ q.text }}</p>
+          </div>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
 </body>
 </html>
