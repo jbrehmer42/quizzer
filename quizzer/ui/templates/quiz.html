@@ -10,6 +10,9 @@
 
   <div class="progress-header">
     <span class="question-counter">Question {{ index + 1 }} of {{ total }}</span>
+    {% if seconds_remaining is not none %}
+    <span class="timer{% if seconds_remaining < 300 %} timer-warning{% endif %}" id="timer-display">{{ seconds_remaining // 60 }} min</span>
+    {% endif %}
   </div>
 
   <p class="question-text">{{ question.question }}</p>
@@ -54,6 +57,24 @@
       radio.closest('form').querySelectorAll('.answer-card').forEach(el => el.classList.remove('selected'));
       radio.closest('.answer-card').classList.add('selected');
     }
+    {% if seconds_remaining is not none %}
+    let secondsRemaining = {{ seconds_remaining }};
+    const timerEl = document.getElementById('timer-display');
+    function updateTimerDisplay() {
+      const mins = Math.floor(secondsRemaining / 60);
+      timerEl.textContent = mins + ' min';
+      timerEl.classList.toggle('timer-warning', secondsRemaining < 300);
+    }
+    const timerInterval = setInterval(function() {
+      if (secondsRemaining <= 0) {
+        clearInterval(timerInterval);
+        document.querySelector('form').submit();
+        return;
+      }
+      secondsRemaining--;
+      updateTimerDisplay();
+    }, 1000);
+    {% endif %}
   </script>
 
 </body>

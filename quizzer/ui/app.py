@@ -1,4 +1,5 @@
 import os
+import time
 import uuid
 
 from flask import Flask, Request
@@ -35,6 +36,28 @@ def handle_question_submission(quiz_session: QuizSession, index: int, req: Reque
     return redirect(url_for("quiz_question", index=new_index))
 
 
+def set_quiz_deadline(req: Request, n_questions: int) -> None:
+    """Set a quiz deadline in the session if the timer is enabled, based on the
+    number of questions and minutes per question.
+    """
+    session.pop("quiz_deadline", None)
+    if req.form.get("enable_timer") == "1":
+        try:
+            minutes_per_question = float(req.form.get("minutes_per_question", 4))
+        except ValueError:
+            minutes_per_question = 4.0
+        if minutes_per_question > 0:
+            session["quiz_deadline"] = time.time() + n_questions * minutes_per_question * 60
+
+
+def get_seconds_remaining() -> int | None:
+    """Get the number of seconds remaining until the quiz deadline, or None if no
+    deadline is set.
+    """
+    deadline = session.get("quiz_deadline")
+    return max(0, int(deadline - time.time())) if deadline is not None else None
+
+
 @app.route("/")
 def home():
     return render_template("index.html", questions=POOL.questions)
@@ -57,6 +80,8 @@ def start_quiz():
     _active_quizzes[quiz_id] = quiz_session
     session["quiz_id"] = quiz_id
 
+    set_quiz_deadline(request, len(selected_questions))
+
     return redirect(url_for("quiz_question", index=0))
 
 
@@ -72,6 +97,10 @@ def quiz_question(index):
     if index < 0 or index >= quiz_session.total_questions:
         return redirect(url_for("quiz_question", index=0))
 
+    seconds_remaining = get_seconds_remaining()
+    if seconds_remaining == 0 and request.method == "GET":
+        return redirect(url_for("quiz_confirm"))
+
     if request.method == "POST":
         return handle_question_submission(quiz_session, index, request)
 
@@ -81,6 +110,7 @@ def quiz_question(index):
         index=index,
         total=quiz_session.total_questions,
         selected_answers=quiz_session.selected_answers_for(index),
+        seconds_remaining=seconds_remaining,
     )
 
 
@@ -97,6 +127,7 @@ def quiz_confirm():
         _completed_quizzes[quiz_id] = quiz_session
         session["completed_quiz_id"] = quiz_id
         session.pop("quiz_id", None)
+        session.pop("quiz_deadline", None)
         _active_quizzes.pop(quiz_id, None)
         return redirect(url_for("quiz_results"))
 

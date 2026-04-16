@@ -35,6 +35,22 @@
       {% endfor %}
     </ul>
 
+    <div class="timer-option">
+      <label class="timer-toggle">
+        <input type="checkbox" id="enable-timer" name="enable_timer" value="1"
+               onchange="onTimerToggle(this.checked)" />
+        Set a time limit
+      </label>
+      <div id="timer-settings" class="timer-settings" hidden>
+        <label for="minutes-per-question">
+          Minutes per question:
+          <input type="number" id="minutes-per-question" name="minutes_per_question"
+                 value="4" min="1" max="999" oninput="updateTotalTime()" />
+        </label>
+        <span class="timer-total" id="timer-total"></span>
+      </div>
+    </div>
+
     <div class="start-bar">
       <button type="submit" class="btn-start" id="start-btn" disabled>Start Quiz</button>
       <span id="start-label" class="start-label">Select at least one question to start.</span>
@@ -44,30 +60,45 @@
   <script>
     const total = {{ questions | length }};
     function updateUI() {
-      const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+      const checked = document.querySelectorAll('input[type="checkbox"][name="question_ids"]:checked').length;
       document.getElementById('count-label').textContent = `${checked} / ${total} selected`;
       const btn = document.getElementById('start-btn');
       const lbl = document.getElementById('start-label');
       btn.disabled = checked === 0;
       lbl.textContent = checked === 0 ? 'Select at least one question to start.' : `${checked} question${checked === 1 ? '' : 's'} selected.`;
+      updateTotalTime();
     }
     function onToggle(checkbox, cardId) {
       document.getElementById(cardId).classList.toggle('selected', checkbox.checked);
       updateUI();
     }
     function selectAll() {
-      document.querySelectorAll('input[type="checkbox"]').forEach((cb, i) => {
+      document.querySelectorAll('input[type="checkbox"][name="question_ids"]').forEach((cb, i) => {
         cb.checked = true;
         cb.closest('.question-card').classList.add('selected');
       });
       updateUI();
     }
     function deselectAll() {
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      document.querySelectorAll('input[type="checkbox"][name="question_ids"]').forEach(cb => {
         cb.checked = false;
         cb.closest('.question-card').classList.remove('selected');
       });
       updateUI();
+    }
+    function onTimerToggle(enabled) {
+      document.getElementById('timer-settings').hidden = !enabled;
+      if (enabled) updateTotalTime();
+    }
+    function updateTotalTime() {
+      if (document.getElementById('enable-timer').checked) {
+        const mins = parseFloat(document.getElementById('minutes-per-question').value) || 0;
+        const checked = document.querySelectorAll('input[type="checkbox"][name="question_ids"]:checked').length;
+        const totalMins = Math.round(mins * checked);
+        document.getElementById('timer-total').textContent = checked > 0
+          ? `Total: ${totalMins} min for ${checked} question${checked === 1 ? '' : 's'}`
+          : '';
+      }
     }
   </script>
   {% else %}

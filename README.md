@@ -15,3 +15,4 @@ Simple, extensible quiz application for self-study and exam preparation.
 - **Question Selection** — Browse available questions and customize selection for your quiz
 - **Multiple Answer Types** — Support for single-choice and multiple-choice questions
 - **Detailed Review** — After completing the quiz, review each question with correct answers and explanations
+- **Time Limit** — Optionally set a time limit for completing your quiz
