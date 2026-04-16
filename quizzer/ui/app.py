@@ -7,7 +7,7 @@ from flask import redirect, render_template, request, session, url_for
 from werkzeug.wrappers import Response
 
 from quizzer.core.question_pool import POOL
-from quizzer.models.quiz import QuizSession, QuestionStatus
+from quizzer.models.quiz import QuizSession, QuestionStatus, QuestionOutcome
 
 
 app = Flask(__name__)
@@ -151,12 +151,14 @@ def quiz_results():
     if not quiz_session:
         return redirect(url_for("home"))
 
-    correct, answered = quiz_session.score()
+    outcomes = quiz_session.score()
     total = quiz_session.total_questions
+    correct = sum(1 for out in outcomes if out == QuestionOutcome.CORRECT)
+    answered = sum(1 for out in outcomes if out != QuestionOutcome.UNANSWERED)
 
     question_outcomes = [
-        {"index": i, "text": question.question, "outcome": quiz_session.get_question_outcome_by_index(i).value}
-        for i, question in enumerate(quiz_session.questions)
+        {"index": i, "text": question.question, "outcome": outcome.value}
+        for i, (question, outcome) in enumerate(zip(quiz_session.questions, outcomes, strict=True))
     ]
 
     return render_template(

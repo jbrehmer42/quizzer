@@ -71,26 +71,20 @@ class QuizSession:
         question = self.questions[index]
         return self._selected_answers.get(question.id_, [])
 
-    def score(self) -> tuple[int, int]:
+    def score(self) -> list[QuestionOutcome]:
         """Return (number_correct, number_answered) excluding skipped questions."""
-        answered = [
-            question for question in self.questions
-            if self.question_status[question.id_] == QuestionStatus.ANSWERED
-        ]
-        sum_correct = 0
-        for question in answered:
-            selected =  [question.answers[i].text for i in self._selected_answers[question.id_]]
-            correct = [answer.text for answer in question.answers if answer.correct]
-            sum_correct += set(selected) == set(correct)
-        return sum_correct, len(answered)
+        result = []
+        for question in self.questions:
+            status = self.question_status[question.id_]
+            if status == QuestionStatus.UNANSWERED or status == QuestionStatus.SKIPPED:
+                result.append(QuestionOutcome.UNANSWERED)
+            else:
+                selected =  [question.answers[i].text for i in self._selected_answers[question.id_]]
+                correct = [answer.text for answer in question.answers if answer.correct]
+                result.append(QuestionOutcome.CORRECT if set(selected) == set(correct) else QuestionOutcome.WRONG)
+        return result
 
-    def get_question_outcome_by_index(self, index: int) -> QuestionOutcome:
-        """Return the QuestionOutcome for the question at the given index."""
-        question = self.get_question_by_index(index)
-        status = self.question_status[question.id_]
-        if status == QuestionStatus.UNANSWERED or status == QuestionStatus.SKIPPED:
-            return QuestionOutcome.UNANSWERED
-        else:
-            selected =  [question.answers[i].text for i in self._selected_answers[question.id_]]
-            correct = [answer.text for answer in question.answers if answer.correct]
-            return QuestionOutcome.CORRECT if set(selected) == set(correct) else QuestionOutcome.WRONG
+        #     selected =  [question.answers[i].text for i in self._selected_answers[question.id_]]
+        #     correct = [answer.text for answer in question.answers if answer.correct]
+        #     sum_correct += set(selected) == set(correct)
+        # return sum_correct, len(answered)

@@ -17,7 +17,8 @@
 
   <p class="question-text">{{ question.question }}</p>
 
-  <form method="post" action="{{ url_for('quiz_question', index=index) }}">
+  <form method="post" action="{{ url_for('quiz_question', index=index) }}"
+    {% if question.question_type != 'single-choice' %}data-max-answers="{{ question.number_of_correct_answers }}"{% endif %}>
     <div class="answer-list">
       {% for answer in question.answers %}
         <label class="answer-card{% if loop.index0 in selected_answers %} selected{% endif %}">
@@ -50,13 +51,31 @@
   </form>
 
   <script>
+    function updateCheckboxStates(form) {
+      // Read maxAnswers, count how many boxes are checked, and disables all unchecked cards once the limit is reached.
+      const maxAnswers = parseInt(form.dataset.maxAnswers);
+      if (isNaN(maxAnswers)) return;
+      const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+      const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+      checkboxes.forEach(cb => {
+        if (!cb.checked) {
+          cb.disabled = checkedCount >= maxAnswers;
+          cb.closest('.answer-card').classList.toggle('disabled', cb.disabled);
+        }
+      });
+    }
     function selectCheckbox(checkbox) {
       checkbox.closest('.answer-card').classList.toggle('selected', checkbox.checked);
+      updateCheckboxStates(checkbox.closest('form'));
     }
     function selectRadio(radio) {
       radio.closest('form').querySelectorAll('.answer-card').forEach(el => el.classList.remove('selected'));
       radio.closest('.answer-card').classList.add('selected');
     }
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('form');
+      if (form) updateCheckboxStates(form);
+    });
     {% if seconds_remaining is not none %}
     let secondsRemaining = {{ seconds_remaining }};
     const timerEl = document.getElementById('timer-display');

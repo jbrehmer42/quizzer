@@ -3,6 +3,7 @@ from datetime import datetime
 from uuid import UUID
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator
+from functools import cached_property
 
 
 class ChoiceAnswer(BaseModel):
@@ -54,3 +55,9 @@ class ChoiceQuestion(BaseModel):
             raise ValueError("At least one answer to a choice question must be correct")
         return answers
 
+    @cached_property
+    def number_of_correct_answers(self) -> int:
+        """Return the number of correct answers for this question. Valuable for
+        muliple-choice questions.
+        """
+        return sum(1 for answer in self.answers if answer.correct)

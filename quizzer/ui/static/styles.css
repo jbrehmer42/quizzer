@@ -15,7 +15,7 @@ body {
 }
 
 .quiz-body {
-  max-width: 640px;
+  max-width: 860px;
   margin: 4rem auto;
   text-align: center;
 }
@@ -303,6 +303,13 @@ a.btn:hover { background: #3a6acc; }
 .answer-card.selected {
   border-color: #4a7cdc;
   background: #eef3fd;
+}
+.answer-card.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.answer-card.disabled input[type="checkbox"] {
+  cursor: not-allowed;
 }
 .answer-card input[type="radio"],
 .answer-card input[type="checkbox"] {
