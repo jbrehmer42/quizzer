@@ -33,6 +33,7 @@ class QuizSession:
             question.id_ : QuestionStatus.UNANSWERED for question in questions
         }
         self._selected_answers: dict[str, list[int]] = {}
+        self._question_flags: dict[str, bool] = {question.id_: False for question in questions}
 
     @property
     def total_questions(self) -> int:
@@ -71,6 +72,16 @@ class QuizSession:
         question = self.questions[index]
         return self._selected_answers.get(question.id_, [])
 
+    def flag_question(self, index: int) -> None:
+        """bookmark/flag the question at the given index."""
+        question = self.get_question_by_index(index)
+        self._question_flags[question.id_] = not self._question_flags[question.id_]
+
+    def is_question_flagged(self, index: int) -> bool:
+        """Return whether the question at the given index is bookmarked/flagged."""
+        question = self.get_question_by_index(index)
+        return self._question_flags.get(question.id_, False)
+
     def score(self) -> list[QuestionOutcome]:
         """Return (number_correct, number_answered) excluding skipped questions."""
         result = []
@@ -84,7 +95,3 @@ class QuizSession:
                 result.append(QuestionOutcome.CORRECT if set(selected) == set(correct) else QuestionOutcome.WRONG)
         return result
 
-        #     selected =  [question.answers[i].text for i in self._selected_answers[question.id_]]
-        #     correct = [answer.text for answer in question.answers if answer.correct]
-        #     sum_correct += set(selected) == set(correct)
-        # return sum_correct, len(answered)

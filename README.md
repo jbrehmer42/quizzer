@@ -16,3 +16,4 @@ Simple, extensible quiz application for self-study and exam preparation.
 - **Multiple Answer Types** — Support for single-choice and multiple-choice questions
 - **Detailed Review** — After completing the quiz, review each question with correct answers and explanations
 - **Time Limit** — Optionally set a time limit for completing your quiz
+- **Bookmarking** — Flag questions for later review during your quiz

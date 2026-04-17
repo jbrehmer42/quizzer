@@ -8,17 +8,28 @@
 </head>
 <body class="quiz-body">
 
+  <form method="post" action="{{ url_for('quiz_question', index=index) }}"
+    {% if question.question_type != 'single-choice' %}data-max-answers="{{ question.number_of_correct_answers }}"{% endif %}>
+
   <div class="progress-header">
     <span class="question-counter">Question {{ index + 1 }} of {{ total }}</span>
-    {% if seconds_remaining is not none %}
-    <span class="timer{% if seconds_remaining < 300 %} timer-warning{% endif %}" id="timer-display">{{ seconds_remaining // 60 }} min</span>
-    {% endif %}
+    <div class="progress-actions">
+      {% if seconds_remaining is not none %}
+      <span class="timer{% if seconds_remaining < 300 %} timer-warning{% endif %}" id="timer-display">{{ seconds_remaining // 60 }} min</span>
+      {% endif %}
+      <button
+        type="submit"
+        class="flag-toggle{% if is_flagged %} is-active{% endif %}"
+        name="bookmark_button"
+        aria-label="{% if is_flagged %}Remove bookmark{% else %}Bookmark question{% endif %}"
+        title="{% if is_flagged %}Remove bookmark{% else %}Bookmark question{% endif %}">
+        <span class="flag-toggle-icon" aria-hidden="true"></span>
+      </button>
+    </div>
   </div>
 
   <p class="question-text">{{ question.question }}</p>
 
-  <form method="post" action="{{ url_for('quiz_question', index=index) }}"
-    {% if question.question_type != 'single-choice' %}data-max-answers="{{ question.number_of_correct_answers }}"{% endif %}>
     <div class="answer-list">
       {% for answer in question.answers %}
         <label class="answer-card{% if loop.index0 in selected_answers %} selected{% endif %}">

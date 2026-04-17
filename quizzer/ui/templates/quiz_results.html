@@ -31,11 +31,18 @@
     <ul class="question-list">
       {% for q in question_outcomes %}
       <li>
-        <a class="question-card question-card--outcome question-card--{{ q.outcome }}"
+        <a class="question-card question-card--outcome question-card--{{ q.outcome }}{% if q.is_flagged %} question-card--bookmarked{% endif %}"
            href="{{ url_for('quiz_review', index=q.index) }}">
           <span class="question-index-badge">{{ q.index + 1 }}</span>
           <div class="question-body">
-            <p class="question-text-preview">{{ q.text }}</p>
+            <div class="question-text-row">
+              <p class="question-text-preview">{{ q.text }}</p>
+              <span class="flag-icon-display" aria-label="{% if q.is_flagged %}Bookmarked{% else %}Not bookmarked{% endif %}" title="{% if q.is_flagged %}Bookmarked{% else %}Not bookmarked{% endif %}">
+                {% if q.is_flagged %}
+                <span class="flag-toggle-icon is-active" aria-hidden="true"></span>
+                {% endif %}
+              </span>
+            </div>
           </div>
         </a>
       </li>

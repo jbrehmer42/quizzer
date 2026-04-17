@@ -10,6 +10,9 @@
 
   <div class="progress-header">
     <span class="question-counter">Question {{ index + 1 }} of {{ total }}</span>
+    <span class="flag-icon-display" aria-label="{% if is_flagged %}Bookmarked{% else %}Not bookmarked{% endif %}" title="{% if is_flagged %}Bookmarked{% else %}Not bookmarked{% endif %}">
+      <span class="flag-toggle-icon{% if is_flagged %} is-active{% endif %}" aria-hidden="true"></span>
+    </span>
   </div>
 
   <div class="quiz-nav">
