@@ -1,8 +1,9 @@
+import random
 from enum import Enum
 from dataclasses import dataclass
 from collections import Counter
 
-
+from quizzer.models.settings import Settings
 from quizzer.models.questions import ChoiceQuestion
 
 
@@ -34,6 +35,24 @@ class QuizSession:
         }
         self._selected_answers: dict[str, list[int]] = {}
         self._question_flags: dict[str, bool] = {question.id_: False for question in questions}
+
+    @classmethod
+    def from_settings(cls, questions: list[ChoiceQuestion], settings: Settings) -> "QuizSession":
+        """Factory method to create a QuizSession from a list of questions and quiz settings."""
+        rng = random.Random()
+
+        if settings.quiz.randomize_question_order:
+            rng.shuffle(questions)
+
+        if settings.quiz.randomize_answer_order:
+            shuffled = []
+            for q in questions:
+                new_answers = q.answers.copy()
+                rng.shuffle(new_answers)
+                shuffled.append(q.model_copy(update={"answers": new_answers}))
+            questions = shuffled
+
+        return cls(questions)
 
     @property
     def total_questions(self) -> int:

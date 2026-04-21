@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quizzer — Settings</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="index-body">
+  <h1>Settings</h1>
+  <p class="subtitle">Configure how quizzes are generated.</p>
+
+  <form action="{{ url_for('settings') }}" method="post">
+
+    {% for section in settings.sections %}
+    <h2 class="settings-section-title">{{ section.title }}</h2>
+    <div class="settings-group">
+      {% for field in section.fields %}
+      <label class="settings-row">
+        <div class="settings-row-text">
+          <span class="settings-row-title">{{ field.label }}</span>
+          <span class="settings-row-desc">{{ field.description }}</span>
+        </div>
+        <input type="checkbox" name="{{ field.form_name }}" value="1"
+               {% if field.value %}checked{% endif %} />
+      </label>
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="settings-footer">
+      <button type="submit" class="btn">Save settings</button>
+      <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</body>
+</html>

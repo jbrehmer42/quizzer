@@ -1,4 +1,5 @@
 import os
+import random
 import time
 import uuid
 
@@ -8,6 +9,7 @@ from werkzeug.wrappers import Response
 
 from quizzer.core.question_pool import POOL
 from quizzer.models.quiz import QuizSession, QuestionStatus, QuestionOutcome
+from quizzer.models.settings import Settings
 
 
 app = Flask(__name__)
@@ -15,6 +17,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-producti
 
 _active_quizzes: dict[str, QuizSession] = {}
 _completed_quizzes: dict[str, QuizSession] = {}
+_settings = Settings()
 
 
 
@@ -71,6 +74,14 @@ def home():
     return render_template("index.html", questions=POOL.questions)
 
 
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    if request.method == "POST":
+        _settings.apply_form(request.form.to_dict())
+        return redirect(url_for("home"))
+    return render_template("settings.html", settings=_settings)
+
+
 @app.route("/quiz/start", methods=["POST"])
 def start_quiz():
     selected_ids = set(request.form.getlist("question_ids"))
@@ -83,7 +94,7 @@ def start_quiz():
     if old_completed_id:
         _completed_quizzes.pop(old_completed_id, None)
 
-    quiz_session = QuizSession(selected_questions)
+    quiz_session = QuizSession.from_settings(selected_questions, settings=_settings)
     quiz_id = str(uuid.uuid4())
     _active_quizzes[quiz_id] = quiz_session
     session["quiz_id"] = quiz_id
