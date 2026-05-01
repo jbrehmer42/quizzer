@@ -16,15 +16,26 @@
   </div>
 
   <div class="quiz-nav">
-    {% if index > 0 %}
-      <a class="btn" href="{{ url_for('quiz_review', index=index - 1) }}">&#8592; Previous</a>
+    {% if practice_mode %}
+      <a class="btn" href="{{ url_for('quiz_question', index=index) }}">&#8592; Back to Question</a>
+      {% if index == total - 1 %}
+        <form method="post" action="{{ url_for('quiz_confirm') }}" style="display:inline;">
+          <button type="submit" class="btn">Finish Quiz &#8594;</button>
+        </form>
+      {% else %}
+        <a class="btn" href="{{ url_for('quiz_question', index=index + 1) }}">Next Question &#8594;</a>
+      {% endif %}
     {% else %}
-      <a class="btn" href="{{ url_for('quiz_results') }}">&#8592; Results</a>
-    {% endif %}
-    {% if index == total - 1 %}
-      <a class="btn" href="{{ url_for('quiz_results') }}">Results &#8594;</a>
-    {% else %}
-      <a class="btn" href="{{ url_for('quiz_review', index=index + 1) }}">Next &#8594;</a>
+      {% if index > 0 %}
+        <a class="btn" href="{{ url_for('quiz_review', index=index - 1) }}">&#8592; Previous</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('quiz_results') }}">&#8592; Results</a>
+      {% endif %}
+      {% if index == total - 1 %}
+        <a class="btn" href="{{ url_for('quiz_results') }}">Results &#8594;</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('quiz_review', index=index + 1) }}">Next &#8594;</a>
+      {% endif %}
     {% endif %}
   </div>
 

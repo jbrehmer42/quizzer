@@ -11,7 +11,7 @@
     <h1>Quizzer</h1>
     <a href="{{ url_for('settings') }}" class="btn btn-secondary btn-sm">Settings</a>
   </div>
-  <p class="subtitle">Select the questions you want to include in your quiz, then click <strong>Start Quiz</strong>.</p>
+  <p class="subtitle">Select the questions you want to include in your quiz, then click <strong>Start Quiz</strong> or <strong>Start Practice</strong>.</p>
 
   {% if questions %}
   <div class="controls">
@@ -55,7 +55,10 @@
     </div>
 
     <div class="start-bar">
-      <button type="submit" class="btn-start" id="start-btn" disabled>Start Quiz</button>
+      <button type="submit" name="mode" value="classic" class="btn-start" id="start-btn" disabled
+              title="Answer all questions, then see your results at the end.">Start Quiz</button>
+      <button type="submit" name="mode" value="practice" class="btn-start btn-practice" id="practice-btn" disabled
+              title="See the correct answer and explanation after each question.">Start Practice</button>
       <span id="start-label" class="start-label">Select at least one question to start.</span>
     </div>
   </form>
@@ -66,8 +69,10 @@
       const checked = document.querySelectorAll('input[type="checkbox"][name="question_ids"]:checked').length;
       document.getElementById('count-label').textContent = `${checked} / ${total} selected`;
       const btn = document.getElementById('start-btn');
+      const practiceBtn = document.getElementById('practice-btn');
       const lbl = document.getElementById('start-label');
       btn.disabled = checked === 0;
+      practiceBtn.disabled = checked === 0;
       lbl.textContent = checked === 0 ? 'Select at least one question to start.' : `${checked} question${checked === 1 ? '' : 's'} selected.`;
       updateTotalTime();
     }

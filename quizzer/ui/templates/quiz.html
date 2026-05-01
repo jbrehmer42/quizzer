@@ -53,7 +53,14 @@
       {% else %}
         <span></span>
       {% endif %}
-      {% if index == total - 1 %}
+      {% if practice_mode %}
+        <button type="submit" class="btn btn--accent" name="show_solution_button">Show Solution</button>
+        {% if index == total - 1 %}
+          <button type="submit" class="btn" name="finish_button">Finish &#8594;</button>
+        {% else %}
+          <button type="submit" class="btn" name="next_button">Next &#8594;</button>
+        {% endif %}
+      {% elif index == total - 1 %}
         <button type="submit" class="btn" name="finish_button">Finish &#8594;</button>
       {% else %}
         <button type="submit" class="btn" name="next_button">Next &#8594;</button>

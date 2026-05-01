@@ -1,5 +1,4 @@
 import os
-import random
 import time
 import uuid
 
@@ -21,30 +20,38 @@ _settings = Settings()
 
 
 
+def _record_answer(quiz_session: QuizSession, index: int, req: Request) -> None:
+    """Record the user's answer selection for the question at the given index."""
+    selected_indices = [int(i) for i in req.form.getlist("answer_indices")]
+    if selected_indices:
+        quiz_session.answer_question(index, selected_indices)
+    elif quiz_session.get_question_status_by_index(index) == QuestionStatus.UNANSWERED:
+        quiz_session.skip_question(index)
+
+
+def _get_navigation_target(index: int, req: Request) -> str:
+    """Determine the redirect URL based on which navigation button was pressed."""
+    if "show_solution_button" in req.form:
+        return url_for("quiz_review", index=index)
+    if "previous_button" in req.form:
+        return url_for("quiz_question", index=index - 1)
+    if "next_button" in req.form:
+        return url_for("quiz_question", index=index + 1)
+    # finish_button or fallback
+    return url_for("quiz_confirm")
+
+
 def handle_question_submission(quiz_session: QuizSession, index: int, req: Request) -> Response:
     """Handle form submission for a quiz question, updating the quiz session accordingly."""
-    next_pressed = "next_button" in req.form.keys()
-    prev_pressed = "previous_button" in req.form.keys()
-    bookmark_pressed = "bookmark_button" in req.form.keys()
-    selected_indices = [int(i) for i in req.form.getlist("answer_indices")]
-    status = quiz_session.get_question_status_by_index(index)
-
-    if bookmark_pressed:
+    if "bookmark_button" in req.form:
+        selected_indices = [int(i) for i in req.form.getlist("answer_indices")]
         if selected_indices:
             quiz_session.answer_question(index, selected_indices)
         quiz_session.flag_question(index)
         return redirect(url_for("quiz_question", index=index))
 
-    if selected_indices:
-        quiz_session.answer_question(index, selected_indices)
-    elif status == QuestionStatus.UNANSWERED:
-        quiz_session.skip_question(index)
-    
-    if not next_pressed and not prev_pressed:
-        return redirect(url_for("quiz_confirm"))
-
-    new_index = index - 1 if prev_pressed else index + 1
-    return redirect(url_for("quiz_question", index=new_index))
+    _record_answer(quiz_session, index, req)
+    return redirect(_get_navigation_target(index, req))
 
 
 def set_quiz_deadline(req: Request, n_questions: int) -> None:
@@ -98,6 +105,7 @@ def start_quiz():
     quiz_id = str(uuid.uuid4())
     _active_quizzes[quiz_id] = quiz_session
     session["quiz_id"] = quiz_id
+    session["practice_mode"] = request.form.get("mode") == "practice"
 
     set_quiz_deadline(request, len(selected_questions))
 
@@ -131,6 +139,7 @@ def quiz_question(index):
         selected_answers=quiz_session.selected_answers_for(index),
         is_flagged=quiz_session.is_question_flagged(index),
         seconds_remaining=seconds_remaining,
+        practice_mode=session.get("practice_mode", False),
     )
 
 
@@ -148,6 +157,7 @@ def quiz_confirm():
         session["completed_quiz_id"] = quiz_id
         session.pop("quiz_id", None)
         session.pop("quiz_deadline", None)
+        session.pop("practice_mode", None)
         _active_quizzes.pop(quiz_id, None)
         return redirect(url_for("quiz_results"))
 
@@ -199,8 +209,14 @@ def quiz_results():
 @app.route("/quiz/review/<int:index>")
 def quiz_review(index):
     """Show a read-only review of the answer for the question at the given index."""
-    quiz_id = session.get("completed_quiz_id")
-    quiz_session = _completed_quizzes.get(quiz_id) if quiz_id else None
+    practice_mode = session.get("practice_mode", False)
+
+    if practice_mode:
+        quiz_id = session.get("quiz_id")
+        quiz_session = _active_quizzes.get(quiz_id) if quiz_id else None
+    else:
+        quiz_id = session.get("completed_quiz_id")
+        quiz_session = _completed_quizzes.get(quiz_id) if quiz_id else None
 
     if not quiz_session:
         return redirect(url_for("home"))
@@ -215,4 +231,5 @@ def quiz_review(index):
         total=quiz_session.total_questions,
         selected_answers=quiz_session.selected_answers_for(index),
         is_flagged=quiz_session.is_question_flagged(index),
+        practice_mode=practice_mode,
     )

@@ -17,3 +17,4 @@ Simple, extensible quiz application for self-study and exam preparation.
 - **Detailed Review** — After completing the quiz, review each question with correct answers and explanations
 - **Time Limit** — Optionally set a time limit for completing your quiz
 - **Bookmarking** — Flag questions for later review during your quiz
+- **Practice Mode** - See correct answers and explanations immediately after each question (instead of waiting until the end). Suitable mode for learning and quick self-assessment.
