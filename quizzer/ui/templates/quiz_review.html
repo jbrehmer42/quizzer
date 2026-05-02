@@ -19,7 +19,7 @@
   <div class="quiz-nav">
     {% if practice_mode %}
       <a class="btn" href="{{ url_for('quiz_question', index=index) }}">&#8592; Back to Question</a>
-      <a class="btn btn-secondary btn-sm" href="{{ url_for('edit_question', question_id=question.id_) }}">Edit</a>
+      <a class="btn btn-secondary btn-sm" href="{{ url_for('edit_question', question_id=question.id_, referrer='quiz_review', quiz_index=index) }}">Edit</a>
       {% if index == total - 1 %}
         <form method="post" action="{{ url_for('quiz_confirm') }}" style="display:inline;">
           <button type="submit" class="btn">Finish Quiz &#8594;</button>

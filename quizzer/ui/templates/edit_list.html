@@ -18,7 +18,7 @@
   <ul class="question-list">
     {% for q in questions %}
     <li>
-      <a class="question-card question-card--outcome" href="{{ url_for('edit_question', question_id=q.id_) }}">
+      <a class="question-card question-card--outcome" href="{{ url_for('edit_question', question_id=q.id_, referrer='edit_list') }}">
         <div class="question-body">
           <p class="question-text-preview">{{ q.question }}</p>
           <div class="question-meta">

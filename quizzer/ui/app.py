@@ -202,6 +202,10 @@ def edit_question(question_id: str):
     if not question:
         return redirect(url_for("edit_list"))
 
+    # Get referrer info from query parameters
+    referrer = request.args.get("referrer", "edit_list")
+    quiz_index = request.args.get("quiz_index", type=int)
+
     error = None
     form_data: dict | None = None
 
@@ -256,6 +260,8 @@ def edit_question(question_id: str):
                 question=question,
                 form_data=form_data,
                 error=error,
+                referrer=referrer,
+                quiz_index=quiz_index,
             )
 
         # Persist to the original source path for this question.
@@ -289,4 +295,6 @@ def edit_question(question_id: str):
         question=question,
         form_data=form_data,
         error=error,
+        referrer=referrer,
+        quiz_index=quiz_index,
     )
