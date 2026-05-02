@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quizzer — Review</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_dark.css') }}">
 </head>
-<body class="quiz-body">
+<body class="quiz-body{% if dark_mode %} dark{% endif %}">
 
   <div class="progress-header">
     <span class="question-counter">Question {{ index + 1 }} of {{ total }}</span>

@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quizzer — Quiz</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_dark.css') }}">
 </head>
-<body class="quiz-body">
+<body class="quiz-body{% if dark_mode %} dark{% endif %}">
 
   <form method="post" action="{{ url_for('quiz_question', index=index) }}"
     {% if question.question_type != 'single-choice' %}data-max-answers="{{ question.number_of_correct_answers }}"{% endif %}>

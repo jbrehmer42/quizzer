@@ -22,6 +22,11 @@ _completed_quizzes: dict[str, QuizSession] = {}
 _settings = Settings()
 
 
+@app.context_processor
+def inject_appearance():
+    return {"dark_mode": _settings.appearance.dark_mode}
+
+
 @app.route("/")
 def home():
     return render_template("index.html", questions=POOL.questions)

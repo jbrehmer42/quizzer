@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quizzer — Settings</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_dark.css') }}">
 </head>
-<body class="index-body">
+<body class="index-body{% if dark_mode %} dark{% endif %}">
   <h1>Settings</h1>
   <p class="subtitle">Configure how quizzes are generated.</p>
 

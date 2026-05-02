@@ -58,6 +58,19 @@ class SettingsSection(BaseModel):
                 setattr(self, field_name, key in form)
 
 
+class AppearanceSettings(SettingsSection):
+    """Settings that control the visual appearance of the application."""
+
+    _section_title: ClassVar[str] = "Appearance"
+    _form_prefix: ClassVar[str] = "appearance"
+
+    dark_mode: bool = Field(
+        default=False,
+        title="Dark mode",
+        description="Use a dark colour scheme across the entire application.",
+    )
+
+
 class QuizSettings(SettingsSection):
     """Settings that control quiz generation behaviour."""
 
@@ -80,6 +93,7 @@ class Settings(BaseModel):
     """Application-wide settings, composed of typed sub-settings objects."""
 
     quiz: QuizSettings = Field(default_factory=QuizSettings)
+    appearance: AppearanceSettings = Field(default_factory=AppearanceSettings)
 
     @property
     def sections(self) -> list[SettingsSection]:

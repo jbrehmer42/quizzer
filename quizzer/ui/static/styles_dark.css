@@ -1,0 +1,175 @@
+/* ── Dark mode ─────────────────────────────────────────────── */
+
+body.dark {
+  background: #1e1e1e;
+  color: #d4d4d4;
+}
+
+.dark .subtitle { color: #9a9a9a; }
+.dark .empty { color: #777; }
+
+.dark .controls button {
+  background: #2d2d2d;
+  border-color: #555;
+  color: #d4d4d4;
+}
+.dark .controls button:hover { background: #3a3a3a; }
+.dark .selected-count { color: #9a9a9a; }
+
+.dark .question-card {
+  border-color: #3e3e3e;
+  background: #252526;
+}
+.dark .question-card:hover { background: #2a2d2e; }
+.dark .question-card.selected {
+  border-color: #4a7cdc;
+  background: #1c2a44;
+}
+
+.dark .question-text-preview { color: #d4d4d4; }
+.dark .badge { background: #333; color: #bbb; }
+
+.dark .start-bar {
+  background: #1e1e1e;
+  border-color: #3e3e3e;
+}
+.dark .start-label { color: #9a9a9a; }
+
+.dark .timer-option {
+  background: #252526;
+  border-color: #3e3e3e;
+}
+.dark .timer-toggle { color: #d4d4d4; }
+.dark .timer-settings label { color: #d4d4d4; }
+.dark .timer-settings input[type="number"] {
+  background: #1e1e1e;
+  border-color: #555;
+  color: #d4d4d4;
+}
+.dark .timer-total { color: #9a9a9a; }
+
+/* Settings page */
+.dark .settings-section-title { color: #9a9a9a; }
+.dark .settings-group { border-color: #3e3e3e; }
+.dark .settings-row {
+  background: #252526;
+  border-bottom-color: #333;
+}
+.dark .settings-row:hover { background: #2a2d2e; }
+.dark .settings-row-title { color: #d4d4d4; }
+.dark .settings-row-desc { color: #888; }
+
+/* Buttons */
+.dark .btn.btn-secondary {
+  background: #2d2d2d;
+  border-color: #555;
+  color: #d4d4d4;
+}
+.dark .btn.btn-secondary:hover { background: #3a3a3a; color: #d4d4d4; }
+.dark .btn--secondary { background: #4b5563; }
+.dark .btn--secondary:hover { background: #6b7280; }
+
+/* Quiz page */
+.dark .question-counter { color: #9a9a9a; }
+.dark .timer { color: #d4d4d4; }
+.dark .question-text { color: #d4d4d4; }
+
+.dark .answer-card {
+  border-color: #3e3e3e;
+  background: #252526;
+}
+.dark .answer-card:hover { background: #2a2d2e; }
+.dark .answer-card.selected {
+  border-color: #4a7cdc;
+  background: #1c2a44;
+}
+.dark .answer-card.disabled { opacity: 0.4; }
+.dark .answer-text { color: #d4d4d4; }
+
+.dark .flag-toggle {
+  border-color: #555;
+  background: #252526;
+}
+.dark .flag-toggle:hover {
+  border-color: #777;
+  background: #2a2d2e;
+}
+.dark .flag-toggle.is-active {
+  border-color: #ce972b;
+  background: #332a10;
+}
+.dark .flag-toggle-icon { background: #777; }
+.dark .flag-toggle-icon.is-active { background: #ce972b; }
+.dark .flag-toggle:hover .flag-toggle-icon { background: #999; }
+.dark .flag-toggle.is-active .flag-toggle-icon { background: #ce972b; }
+
+/* Confirm page */
+.dark .stat-card {
+  border-color: #4a7cdc;
+  background: #1c2a44;
+}
+.dark .stat-card--skipped {
+  border-color: #f0a050;
+  background: #332a10;
+}
+.dark .stat-card--unanswered {
+  border-color: #555;
+  background: #2d2d2d;
+}
+.dark .stat-number { color: #6aa3f7; }
+.dark .stat-card--skipped .stat-number { color: #f0a050; }
+.dark .stat-card--unanswered .stat-number { color: #888; }
+.dark .stat-label { color: #9a9a9a; }
+
+/* Results page */
+.dark .results-overview-heading { color: #9a9a9a; }
+.dark .question-index-badge { background: #3e3e3e; color: #d4d4d4; }
+
+.dark .question-card--correct,
+.dark .question-card--correct:hover {
+  border-color: #27ae60;
+  background: #1a3325;
+}
+.dark .question-card--wrong,
+.dark .question-card--wrong:hover {
+  border-color: #e74c3c;
+  background: #3b1a1a;
+}
+
+/* Review page */
+.dark .answer-card--correct,
+.dark .answer-card--correct:hover {
+  border-color: #27ae60;
+  background: #1a3325;
+}
+.dark .answer-card--missed,
+.dark .answer-card--missed:hover {
+  border-color: #27ae60;
+  background: #1a2e22;
+}
+.dark .answer-card--wrong,
+.dark .answer-card--wrong:hover {
+  border-color: #e74c3c;
+  background: #3b1a1a;
+}
+.dark .answer-rationale { color: #9a9a9a; }
+
+.dark .question-explanation {
+  border-color: #3e3e3e;
+  background: #252526;
+}
+.dark .question-explanation strong { color: #d4d4d4; }
+
+.dark .info-box {
+  border-color: #3e3e3e;
+  background: #252526;
+}
+.dark .info-box .label { color: #9a9a9a; }
+.dark .placeholder {
+  color: #777;
+  border-color: #444;
+}
+
+.dark .error { color: #e74c3c; }
+
+.dark h1, .dark h2 { color: #e0e0e0; }
