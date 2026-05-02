@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quizzer — Edit Question</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_dark.css') }}">
+</head>
+<body class="index-body{% if dark_mode %} dark{% endif %}">
+  <div class="page-header">
+    <h1>Edit Question</h1>
+    <a href="{{ url_for('edit_list') }}" class="btn btn-secondary btn-sm">Back to List</a>
+  </div>
+
+  <div class="edit-meta">
+    <span class="badge">{{ question.question_type }}</span>
+    <span class="edit-meta-id">ID: {{ question.id_ }}</span>
+  </div>
+
+  {% if error %}
+  <div class="edit-error">
+    <strong>Validation failed:</strong>
+    <pre>{{ error }}</pre>
+  </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('edit_question', question_id=question.id_) }}">
+
+    <div class="edit-section">
+      <label class="edit-label" for="question_text">Question</label>
+      <textarea class="edit-textarea edit-textarea--md" id="question_text" name="question_text">{{ form_data.question_text }}</textarea>
+    </div>
+
+    <div class="edit-section">
+      <span class="edit-label">Answers</span>
+      {% for answer in form_data.answers %}
+      <div class="edit-answer-group{% if answer.correct %} edit-answer-group--correct{% endif %}">
+        <label class="edit-sublabel" for="answer_text_{{ loop.index0 }}">Text</label>
+        <textarea class="edit-textarea edit-textarea--sm" id="answer_text_{{ loop.index0 }}" name="answer_text_{{ loop.index0 }}">{{ answer.text }}</textarea>
+        <label class="edit-sublabel" for="answer_rationale_{{ loop.index0 }}">Rationale</label>
+        <textarea class="edit-textarea edit-textarea--sm" id="answer_rationale_{{ loop.index0 }}" name="answer_rationale_{{ loop.index0 }}">{{ answer.rationale }}</textarea>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="edit-section">
+      <label class="edit-label" for="tags">Tags</label>
+      <p class="edit-hint">Comma-separated list of tags.</p>
+      <input class="edit-input" type="text" id="tags" name="tags" value="{{ form_data.tags }}" />
+    </div>
+
+    <div class="edit-section">
+      <label class="edit-label" for="explanation">Explanation</label>
+      <textarea class="edit-textarea edit-textarea--md" id="explanation" name="explanation">{{ form_data.explanation }}</textarea>
+    </div>
+
+    <div class="edit-section">
+      <label class="edit-label" for="resources">Resources</label>
+      <p class="edit-hint">One URL per line.</p>
+      <textarea class="edit-textarea edit-textarea--sm" id="resources" name="resources">{{ form_data.resources }}</textarea>
+    </div>
+
+    <div class="edit-actions">
+      <button type="submit" class="btn">Save</button>
+      <a href="{{ url_for('edit_list') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</body>
+</html>

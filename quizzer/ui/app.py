@@ -1,10 +1,13 @@
+import json
 import os
 import uuid
 
 from flask import Flask
 from flask import redirect, render_template, request, session, url_for
+from pydantic import ValidationError
 
 from quizzer.core.question_pool import POOL
+from quizzer.models.questions import ChoiceQuestion
 from quizzer.models.quiz import QuizSession, QuestionStatus, QuestionOutcome
 from quizzer.models.settings import Settings
 from quizzer.ui.helpers import (
@@ -183,4 +186,107 @@ def quiz_review(index):
         selected_answers=quiz_session.selected_answers_for(index),
         is_flagged=quiz_session.is_question_flagged(index),
         practice_mode=practice_mode,
+    )
+
+
+@app.route("/edit")
+def edit_list():
+    """Show all questions for selection to edit."""
+    return render_template("edit_list.html", questions=POOL.questions)
+
+
+@app.route("/edit/<question_id>", methods=["GET", "POST"])
+def edit_question(question_id: str):
+    """Edit a question via individual form fields."""
+    question = POOL.get_question_by_id(question_id)
+    if not question:
+        return redirect(url_for("edit_list"))
+
+    error = None
+    form_data: dict | None = None
+
+    if request.method == "POST":
+        form = request.form
+
+        # Reconstruct answers from indexed form fields
+        answers = []
+        i = 0
+        while f"answer_text_{i}" in form:
+            answers.append({
+                "text": form[f"answer_text_{i}"],
+                "correct": f"answer_correct_{i}" in form,
+                "rationale": form.get(f"answer_rationale_{i}", ""),
+            })
+            i += 1
+
+        # Build the full question dict, preserving non-editable fields
+        tags_raw = form.get("tags", "")
+        tags = [t.strip() for t in tags_raw.split(",") if t.strip()]
+
+        resources_raw = form.get("resources", "")
+        resources = [r.strip() for r in resources_raw.splitlines() if r.strip()]
+
+        data = {
+            "id_": question.id_,
+            "question": form.get("question_text", ""),
+            "answers": answers,
+            "tags": tags,
+            "question_type": question.question_type,
+            "explanation": form.get("explanation", ""),
+            "version": question.version,
+            "resources": resources,
+            "meta": question.meta.model_dump(),
+        }
+
+        # Keep form data for re-rendering on error
+        form_data = {
+            "question_text": data["question"],
+            "answers": answers,
+            "tags": tags_raw,
+            "explanation": data["explanation"],
+            "resources": resources_raw,
+        }
+
+        try:
+            updated = ChoiceQuestion.model_validate(data)
+        except ValidationError as e:
+            error = str(e)
+            return render_template(
+                "edit_question.html",
+                question=question,
+                form_data=form_data,
+                error=error,
+            )
+
+        # Persist to the original source path for this question.
+        file_path = POOL.get_question_path_by_id(updated.id_)
+        file_path.write_text(
+            json.dumps(data, indent=2, ensure_ascii=False, default=str) + "\n"
+        )
+
+        # Update the in-memory pool
+        for i, q in enumerate(POOL.questions):
+            if q.id_ == updated.id_:
+                POOL.questions[i] = updated
+                break
+
+        return redirect(url_for("edit_question", question_id=updated.id_))
+
+    # GET: populate form_data from the current question
+    form_data = {
+        "question_text": question.question,
+        "answers": [
+            {"text": a.text, "correct": a.correct, "rationale": a.rationale}
+            for a in question.answers
+        ],
+        "tags": ", ".join(question.tags),
+        "explanation": question.explanation,
+        "resources": "\n".join(question.resources),
+    }
+
+    return render_template(
+        "edit_question.html",
+        question=question,
+        form_data=form_data,
+        error=error,
     )

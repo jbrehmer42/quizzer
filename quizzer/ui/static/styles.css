@@ -692,3 +692,107 @@ a.btn:hover { background: #3a6acc; }
   color: #fff;
 }
 
+/* ── Edit page ─────────────────────────────────────────────── */
+
+.edit-textarea {
+  width: 100%;
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fafafa;
+  color: #1a1a2e;
+  resize: vertical;
+  overflow: auto;
+}
+
+.edit-textarea--md { min-height: 10rem; }
+.edit-textarea--sm { min-height: 4rem; }
+
+.edit-input {
+  width: 100%;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fafafa;
+  color: #1a1a2e;
+}
+
+.edit-section {
+  margin-bottom: 1.5rem;
+}
+
+.edit-label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: #333;
+}
+
+.edit-sublabel {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #555;
+  margin: 0.4rem 0 0.2rem;
+}
+
+.edit-hint {
+  font-size: 0.8rem;
+  color: #777;
+  margin: 0 0 0.35rem;
+}
+
+.edit-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.edit-meta-id {
+  font-size: 0.78rem;
+  color: #888;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+.edit-answer-group {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.6rem;
+  background: #fff;
+}
+
+.edit-answer-group--correct {
+  border-color: #27ae60;
+  background: #eafaf1;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.edit-error {
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+}
+
+.edit-error pre {
+  margin: 0.4rem 0 0;
+  white-space: pre-wrap;
+  font-size: 0.82rem;
+}
+

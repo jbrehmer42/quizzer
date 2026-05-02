@@ -10,7 +10,10 @@
 <body class="index-body{% if dark_mode %} dark{% endif %}">
   <div class="page-header">
     <h1>Quizzer</h1>
-    <a href="{{ url_for('settings') }}" class="btn btn-secondary btn-sm">Settings</a>
+    <div>
+      <a href="{{ url_for('edit_list') }}" class="btn btn-secondary btn-sm">Edit Questions</a>
+      <a href="{{ url_for('settings') }}" class="btn btn-secondary btn-sm">Settings</a>
+    </div>
   </div>
   <p class="subtitle">Select the questions you want to include in your quiz, then click <strong>Start Quiz</strong> or <strong>Start Practice</strong>.</p>
 

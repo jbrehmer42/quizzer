@@ -172,4 +172,46 @@ body.dark {
 
 .dark .error { color: #e74c3c; }
 
+
+/* ── Edit page ─────────────────────────────────────────────── */
+
+
+.dark .edit-textarea {
+  background: #1e1e1e;
+  border-color: #3e3e3e;
+  color: #d4d4d4;
+}
+
+.dark .edit-input {
+  background: #1e1e1e;
+  border-color: #3e3e3e;
+  color: #d4d4d4;
+}
+
+.dark .edit-label { color: #d4d4d4; }
+.dark .edit-sublabel { color: #9a9a9a; }
+.dark .edit-hint { color: #777; }
+.dark .edit-meta-id { color: #777; }
+
+.dark .edit-answer-group {
+  border-color: #3e3e3e;
+  background: #252526;
+}
+
+.dark .edit-answer-group--correct {
+  border-color: #27ae60;
+  background: #1a3325;
+}
+
+.dark .edit-answer-group--correct .edit-textarea {
+  border-color: #2b7a49;
+  background: #1f2e24;
+}
+
+.dark .edit-error {
+  border-color: #e74c3c;
+  background: #3b1a1a;
+  color: #fca5a5;
+}
+
 .dark h1, .dark h2 { color: #e0e0e0; }
