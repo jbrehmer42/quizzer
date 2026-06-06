@@ -7,6 +7,7 @@ from flask import redirect, render_template, request, session, url_for
 from pydantic import ValidationError
 
 from quizzer.core.question_pool import POOL
+from quizzer.core.quiz_store import QUIZ_STORE, SavedQuiz, QuizResult
 from quizzer.models.questions import ChoiceQuestion
 from quizzer.models.quiz import QuizSession, QuestionStatus, QuestionOutcome
 from quizzer.models.settings import Settings
@@ -60,6 +61,7 @@ def start_quiz():
     _active_quizzes[quiz_id] = quiz_session
     session["quiz_id"] = quiz_id
     session["practice_mode"] = request.form.get("mode") == "practice"
+    session.pop("saved_quiz_id", None)
 
     set_quiz_deadline(request, len(selected_questions))
 
@@ -109,10 +111,30 @@ def quiz_confirm():
     if request.method == "POST":
         _completed_quizzes[quiz_id] = quiz_session
         session["completed_quiz_id"] = quiz_id
-        session.pop("quiz_id", None)
         session.pop("quiz_deadline", None)
         session.pop("practice_mode", None)
         _active_quizzes.pop(quiz_id, None)
+
+        # Persist the quiz and its result
+        saved_quiz_id = session.pop("saved_quiz_id", None) or quiz_id
+        outcomes = quiz_session.score()
+        total = quiz_session.total_questions
+        correct = sum(1 for o in outcomes if o == QuestionOutcome.CORRECT)
+        answered = sum(1 for o in outcomes if o != QuestionOutcome.UNANSWERED)
+
+        saved_quiz = QUIZ_STORE.get(saved_quiz_id)
+        if saved_quiz:
+            saved_quiz.result = QuizResult(correct=correct, answered=answered, total=total)
+        else:
+            saved_quiz = SavedQuiz(
+                id=saved_quiz_id,
+                name=f"Quiz ({total} questions)",
+                question_ids=[q.id_ for q in quiz_session.questions],
+                result=QuizResult(correct=correct, answered=answered, total=total),
+            )
+        QUIZ_STORE.save_quiz(saved_quiz)
+
+        session.pop("quiz_id", None)
         return redirect(url_for("quiz_results"))
 
     total = quiz_session.total_questions
@@ -298,3 +320,56 @@ def edit_question(question_id: str):
         referrer=referrer,
         quiz_index=quiz_index,
     )
+
+
+@app.route("/history")
+def history():
+    """Show all saved quizzes with their result statistics."""
+    saved_quizzes = QUIZ_STORE.quizzes
+    return render_template("history.html", saved_quizzes=saved_quizzes)
+
+
+@app.route("/history/<quiz_id>/retake", methods=["POST"])
+def retake_quiz(quiz_id: str):
+    """Retake a previously saved quiz. Check whether all questions still
+    exist in the pool before starting.
+    """
+    saved_quiz = QUIZ_STORE.get(quiz_id)
+    if not saved_quiz:
+        return redirect(url_for("history"))
+
+    missing_ids = [qid for qid in saved_quiz.question_ids if qid not in POOL]
+    if missing_ids:
+        return render_template(
+            "history.html",
+            saved_quizzes=QUIZ_STORE.quizzes,
+            error=(
+                f"Cannot retake quiz: {len(missing_ids)} question(s) no longer exist "
+                f"in the pool. Missing IDs: {', '.join(missing_ids)}",
+            )
+        )
+
+    old_completed_id = session.pop("completed_quiz_id", None)
+    if old_completed_id:
+        _completed_quizzes.pop(old_completed_id, None)
+
+    available_questions = [
+        POOL.get_question_by_id(qid) for qid in saved_quiz.question_ids if qid in POOL
+    ]
+    quiz_session = QuizSession.from_settings(available_questions, settings=_settings)
+    active_quiz_id = str(uuid.uuid4())
+    _active_quizzes[active_quiz_id] = quiz_session
+    session["quiz_id"] = active_quiz_id
+    session["saved_quiz_id"] = saved_quiz.id
+    session["practice_mode"] = False
+
+    set_quiz_deadline(request, len(available_questions))
+
+    return redirect(url_for("quiz_question", index=0))
+
+
+@app.route("/history/<quiz_id>/delete", methods=["POST"])
+def delete_saved_quiz(quiz_id: str):
+    """Delete a saved quiz from history."""
+    QUIZ_STORE.delete_quiz(quiz_id)
+    return redirect(url_for("history"))

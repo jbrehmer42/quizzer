@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quizzer — Quiz History</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_dark.css') }}">
+</head>
+<body class="index-body{% if dark_mode %} dark{% endif %}">
+  <div class="page-header">
+    <h1>Quiz History</h1>
+    <div>
+      <a href="{{ url_for('home') }}" class="btn btn-secondary btn-sm">&larr; Back</a>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="history-error">
+    <p>{{ error }}</p>
+  </div>
+  {% endif %}
+
+  {% if saved_quizzes %}
+  <ul class="question-list">
+    {% for quiz in saved_quizzes %}
+    <li>
+      <div class="question-card history-card">
+        <div class="question-body">
+          <p class="question-text-preview">{{ quiz.name }}</p>
+          <div class="question-meta">
+            <span class="badge">{{ quiz.question_ids | length }} questions</span>
+            {% if quiz.result %}
+            <span class="badge badge--result">{{ quiz.result.correct }}/{{ quiz.result.answered }} correct</span>
+            {% if quiz.result.total - quiz.result.answered > 0 %}
+            <span class="badge badge--skipped">{{ quiz.result.total - quiz.result.answered }} skipped</span>
+            {% endif %}
+            <span class="badge badge--date">{{ quiz.result.completed_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            {% else %}
+            <span class="badge badge--no-result">No attempts yet</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="history-actions">
+          <form action="{{ url_for('retake_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline">
+            <button type="submit" class="btn btn-sm">Retake</button>
+          </form>
+          <form action="{{ url_for('delete_saved_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline"
+                onsubmit="return confirm('Delete this saved quiz?')">
+            <button type="submit" class="btn btn-secondary btn-sm btn--danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No saved quizzes yet. Complete a quiz to see it here.</p>
+  {% endif %}
+
+</body>
+</html>

@@ -40,12 +40,13 @@ class QuizStore:
         if not path.exists():
             print(f"Quiz store file not found: {path}.")
             answer = input("Create new quiz store in this location? (y/n) ")
-            if answer.casefold() != "y":
+            if answer.casefold().startswith("y"):
                 return cls(quizzes={}, path=path)
             else:
                 raise RuntimeError(
                     f"Quiz store file not found: {path} and no confirmation to create new one."
                 )
+        
         quizzes = {}
         data = json.loads(path.read_text())
         for item in data:

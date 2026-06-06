@@ -215,3 +215,18 @@ body.dark {
 }
 
 .dark h1, .dark h2 { color: #e0e0e0; }
+
+/* Dark mode history */
+.dark .history-card:hover { background: #2a2d2e; }
+.dark .badge--result { background: #1e3a2a; color: #7dcea0; }
+.dark .badge--skipped { background: #3b3520; color: #f0d070; }
+.dark .badge--date { background: #333; color: #aaa; }
+.dark .badge--no-result { background: #3b1a1a; color: #fca5a5; }
+.dark .btn--danger { color: #f87171; border-color: #f87171; }
+.dark .btn--danger:hover { background: #dc3545; color: #fff; }
+.dark .history-error {
+  background: #3b1a1a;
+  color: #fca5a5;
+  border-color: #e74c3c;
+}
+

@@ -54,5 +54,11 @@ class QuestionPool:
             raise ValueError(f"Got questions {q} for ID {question_id}")
         return q[0]
 
+    def __contains__(self, item: str | ChoiceQuestion) -> bool:
+        """Check if a question with the given ID exists in the pool"""
+        if isinstance(item, ChoiceQuestion):
+            return any(q.id_ == item.id_ for q in self.questions)
+        return any(q.id_ == item for q in self.questions)
+
 
 POOL = QuestionPool.from_files(DATA_PATH)
