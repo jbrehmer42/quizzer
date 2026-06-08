@@ -7,9 +7,9 @@ from flask import redirect, render_template, request, session, url_for
 from pydantic import ValidationError
 
 from quizzer.core.question_pool import POOL
-from quizzer.core.quiz_store import QUIZ_STORE, SavedQuiz, QuizResult
+from quizzer.core.quiz_store import QUIZ_STORE, SavedQuiz
 from quizzer.models.questions import ChoiceQuestion
-from quizzer.models.quiz import QuizSession, QuestionStatus, QuestionOutcome
+from quizzer.models.quiz import QuizSession, QuestionStatus, ScoringResult
 from quizzer.models.settings import Settings
 from quizzer.ui.helpers import (
     handle_question_submission,
@@ -121,13 +121,13 @@ def quiz_confirm():
 
         saved_quiz = QUIZ_STORE.get(saved_quiz_id)
         if saved_quiz:
-            saved_quiz.result = QuizResult(correct=result.correct, answered=result.answered, total=result.total)
+            saved_quiz.result = result
         else:
             saved_quiz = SavedQuiz(
                 id=saved_quiz_id,
                 name=f"Quiz ({result.total} questions)",
                 question_ids=[q.id_ for q in quiz_session.questions],
-                result=QuizResult(correct=result.correct, answered=result.answered, total=result.total),
+                result=result,
             )
         QUIZ_STORE.save_quiz(saved_quiz)
 

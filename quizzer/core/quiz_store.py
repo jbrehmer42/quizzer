@@ -6,15 +6,7 @@ from typing import Final
 from pydantic import BaseModel, Field
 
 from quizzer.core.paths import PERSISTENCE_PATH
-
-
-class QuizResult(BaseModel):
-    """Result statistics from a completed quiz attempt."""
-
-    correct: int
-    answered: int
-    total: int
-    completed_at: datetime = Field(default_factory=datetime.now)
+from quizzer.models.quiz import ScoringResult
 
 
 class SavedQuiz(BaseModel):
@@ -23,7 +15,7 @@ class SavedQuiz(BaseModel):
     id: str
     name: str
     question_ids: list[str]
-    result: QuizResult | None = None
+    result: ScoringResult | None = None
     created_at: datetime = Field(default_factory=datetime.now)
 
 

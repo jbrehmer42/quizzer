@@ -1,7 +1,8 @@
 import random
 from enum import Enum
+from datetime import datetime
 from collections import Counter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from quizzer.models.settings import Settings
 from quizzer.models.questions import ChoiceQuestion
@@ -30,6 +31,7 @@ class ScoringResult(BaseModel):
     total: int
     correct: int
     answered: int
+    completed_at: datetime = Field(default_factory=datetime.now)
 
     @property
     def skipped(self) -> int:
