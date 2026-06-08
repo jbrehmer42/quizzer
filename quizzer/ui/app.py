@@ -7,14 +7,15 @@ from flask import redirect, render_template, request, session, url_for
 from pydantic import ValidationError
 
 from quizzer.core.question_pool import POOL
-from quizzer.core.quiz_store import QUIZ_STORE, SavedQuiz
+from quizzer.core.quiz_store import QUIZ_STORE
 from quizzer.models.questions import ChoiceQuestion
-from quizzer.models.quiz import QuizSession, QuestionStatus, ScoringResult
+from quizzer.models.quiz import QuizSession, QuestionStatus
 from quizzer.models.settings import Settings
 from quizzer.ui.helpers import (
     handle_question_submission,
     set_quiz_deadline,
     get_seconds_remaining,
+    persist_quiz,
 )
 
 
@@ -114,23 +115,7 @@ def quiz_confirm():
         session.pop("quiz_deadline", None)
         session.pop("practice_mode", None)
         _active_quizzes.pop(quiz_id, None)
-
-        # Persist the quiz and its result
-        saved_quiz_id = session.pop("saved_quiz_id", None) or quiz_id
-        result = quiz_session.score()
-
-        saved_quiz = QUIZ_STORE.get(saved_quiz_id)
-        if saved_quiz:
-            saved_quiz.result = result
-        else:
-            saved_quiz = SavedQuiz(
-                id=saved_quiz_id,
-                name=f"Quiz ({result.total} questions)",
-                question_ids=[q.id_ for q in quiz_session.questions],
-                result=result,
-            )
-        QUIZ_STORE.save_quiz(saved_quiz)
-
+        persist_quiz(quiz_session, quiz_id)
         session.pop("quiz_id", None)
         return redirect(url_for("quiz_results"))
 

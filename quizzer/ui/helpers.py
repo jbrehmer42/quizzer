@@ -3,7 +3,8 @@ import time
 from flask import Request, session, url_for, redirect
 from werkzeug.wrappers import Response
 
-from quizzer.models.quiz import QuizSession, QuestionStatus
+from quizzer.models.quiz import QuizSession, QuestionStatus, ScoringResult
+from quizzer.core.quiz_store import QUIZ_STORE, SavedQuiz
 
 
 def _record_answer(quiz_session: QuizSession, index: int, req: Request) -> None:
@@ -60,3 +61,24 @@ def get_seconds_remaining() -> int | None:
     """
     deadline = session.get("quiz_deadline")
     return max(0, int(deadline - time.time())) if deadline is not None else None
+
+
+def persist_quiz(quiz_session: QuizSession, quiz_id: str) -> None:
+    """Persist the quiz and its result in the quiz store, either by updating
+    an existing saved quiz or by creating a new one if no saved quiz exists
+    for the current quiz session.
+    """
+    saved_quiz_id = session.pop("saved_quiz_id", None) or quiz_id
+    result = quiz_session.score()
+
+    saved_quiz = QUIZ_STORE.get(saved_quiz_id)
+    if saved_quiz:
+        saved_quiz.result = result
+    else:
+        saved_quiz = SavedQuiz(
+            id=saved_quiz_id,
+            name=f"Quiz ({result.total} questions)",
+            question_ids=[q.id_ for q in quiz_session.questions],
+            result=result,
+        )
+    QUIZ_STORE.save_quiz(saved_quiz)
