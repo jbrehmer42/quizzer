@@ -1,7 +1,7 @@
 import random
 from enum import Enum
-from dataclasses import dataclass
 from collections import Counter
+from pydantic import BaseModel
 
 from quizzer.models.settings import Settings
 from quizzer.models.questions import ChoiceQuestion
@@ -21,6 +21,19 @@ class QuestionOutcome(Enum):
     CORRECT = "correct"
     WRONG = "wrong"
     UNANSWERED = "unanswered"
+
+
+class ScoringResult(BaseModel):
+    """Overall scoring result for a completed quiz session."""
+
+    outcomes: list[QuestionOutcome]
+    total: int
+    correct: int
+    answered: int
+
+    @property
+    def skipped(self) -> int:
+        return self.total - self.answered
 
 
 class QuizSession:
@@ -101,8 +114,7 @@ class QuizSession:
         question = self.get_question_by_index(index)
         return self._question_flags.get(question.id_, False)
 
-    def score(self) -> list[QuestionOutcome]:
-        """Return (number_correct, number_answered) excluding skipped questions."""
+    def _assign_outcomes(self) -> list[QuestionOutcome]:
         result = []
         for question in self.questions:
             status = self.question_status[question.id_]
@@ -114,3 +126,14 @@ class QuizSession:
                 result.append(QuestionOutcome.CORRECT if set(selected) == set(correct) else QuestionOutcome.WRONG)
         return result
 
+    def score(self) -> ScoringResult:
+        """Score the quiz session by assigning correct, wrong, and unsanswered to
+        any question in the quiz.
+        """
+        outcomes = self._assign_outcomes()
+        return ScoringResult(
+            outcomes=outcomes,
+            total=self.total_questions,
+            correct=sum(1 for out in outcomes if out == QuestionOutcome.CORRECT),
+            answered=sum(1 for out in outcomes if out != QuestionOutcome.UNANSWERED),
+        )

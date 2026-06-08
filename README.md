@@ -18,3 +18,4 @@ Simple, extensible quiz application for self-study and exam preparation.
 - **Time Limit** — Optionally set a time limit for completing your quiz
 - **Bookmarking** — Flag questions for later review during your quiz
 - **Practice Mode** - See correct answers and explanations immediately after each question (instead of waiting until the end). Suitable mode for learning and quick self-assessment.
+- **Session Persistence** - Quiz progress is saved in the session, so that completed quizzes can be done again in the future.

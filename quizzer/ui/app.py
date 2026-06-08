@@ -117,20 +117,17 @@ def quiz_confirm():
 
         # Persist the quiz and its result
         saved_quiz_id = session.pop("saved_quiz_id", None) or quiz_id
-        outcomes = quiz_session.score()
-        total = quiz_session.total_questions
-        correct = sum(1 for o in outcomes if o == QuestionOutcome.CORRECT)
-        answered = sum(1 for o in outcomes if o != QuestionOutcome.UNANSWERED)
+        result = quiz_session.score()
 
         saved_quiz = QUIZ_STORE.get(saved_quiz_id)
         if saved_quiz:
-            saved_quiz.result = QuizResult(correct=correct, answered=answered, total=total)
+            saved_quiz.result = QuizResult(correct=result.correct, answered=result.answered, total=result.total)
         else:
             saved_quiz = SavedQuiz(
                 id=saved_quiz_id,
-                name=f"Quiz ({total} questions)",
+                name=f"Quiz ({result.total} questions)",
                 question_ids=[q.id_ for q in quiz_session.questions],
-                result=QuizResult(correct=correct, answered=answered, total=total),
+                result=QuizResult(correct=result.correct, answered=result.answered, total=result.total),
             )
         QUIZ_STORE.save_quiz(saved_quiz)
 
@@ -157,11 +154,7 @@ def quiz_results():
     if not quiz_session:
         return redirect(url_for("home"))
 
-    outcomes = quiz_session.score()
-    total = quiz_session.total_questions
-    correct = sum(1 for out in outcomes if out == QuestionOutcome.CORRECT)
-    answered = sum(1 for out in outcomes if out != QuestionOutcome.UNANSWERED)
-
+    result = quiz_session.score()
     question_outcomes = [
         {
             "index": i,
@@ -169,15 +162,17 @@ def quiz_results():
             "outcome": outcome.value,
             "is_flagged": quiz_session.is_question_flagged(i),
         }
-        for i, (question, outcome) in enumerate(zip(quiz_session.questions, outcomes, strict=True))
+        for i, (question, outcome) in enumerate(
+            zip(quiz_session.questions, result.outcomes, strict=True)
+        )
     ]
 
     return render_template(
         "quiz_results.html",
-        correct=correct,
-        answered=answered,
-        total=total,
-        skipped=total - answered,
+        correct=result.correct,
+        answered=result.answered,
+        total=result.total,
+        skipped=result.skipped,
         question_outcomes=question_outcomes,
     )
 
