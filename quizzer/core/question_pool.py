@@ -1,3 +1,4 @@
+from collections import Counter
 from pathlib import Path
 from pydantic import ValidationError
 
@@ -59,6 +60,13 @@ class QuestionPool:
         if isinstance(item, ChoiceQuestion):
             return any(q.id_ == item.id_ for q in self.questions)
         return any(q.id_ == item for q in self.questions)
+
+    def get_tag_counts(self) -> dict[str, int]:
+        """Return a sorted dict mapping each tag to its question count."""
+        tag_counts = Counter()
+        for q in self.questions:
+            tag_counts.update(q.tags)
+        return dict(sorted(tag_counts.items()))
 
 
 POOL = QuestionPool.from_files(DATA_PATH)

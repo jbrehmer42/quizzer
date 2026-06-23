@@ -12,7 +12,7 @@ Simple, extensible quiz application for self-study and exam preparation.
 
 ## Features
 
-- **Question Selection** — Browse available questions and customize selection for your quiz
+- **Question Selection** — Browse available questions and customize selection for your quiz. Optionally select questions by tags to focus on specific topics.
 - **Multiple Answer Types** — Support for single-choice and multiple-choice questions
 - **Detailed Review** — After completing the quiz, review each question with correct answers and explanations
 - **Time Limit** — Optionally set a time limit for completing your quiz

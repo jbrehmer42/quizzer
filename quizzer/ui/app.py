@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from quizzer.core.question_pool import POOL
 from quizzer.core.quiz_store import QUIZ_STORE
+from quizzer.core.sampling import sample_questions_by_tags
 from quizzer.models.questions import ChoiceQuestion
 from quizzer.models.quiz import QuizSession, QuestionStatus
 from quizzer.models.settings import Settings
@@ -52,6 +53,41 @@ def start_quiz():
 
     if not selected_questions:
         return redirect(url_for("home"))
+
+    old_completed_id = session.pop("completed_quiz_id", None)
+    if old_completed_id:
+        _completed_quizzes.pop(old_completed_id, None)
+
+    quiz_session = QuizSession.from_settings(selected_questions, settings=_settings)
+    quiz_id = str(uuid.uuid4())
+    _active_quizzes[quiz_id] = quiz_session
+    session["quiz_id"] = quiz_id
+    session["practice_mode"] = request.form.get("mode") == "practice"
+    session.pop("saved_quiz_id", None)
+
+    set_quiz_deadline(request, len(selected_questions))
+
+    return redirect(url_for("quiz_question", index=0))
+
+
+@app.route("/quiz/by-tags", methods=["GET"])
+def quiz_by_tags():
+    """Show the tag-based quiz creation page."""
+    return render_template("quiz_by_tags.html", tags=POOL.get_tag_counts())
+
+
+@app.route("/quiz/start-by-tags", methods=["POST"])
+def start_quiz_by_tags():
+    """Start a quiz using randomly selected questions from the chosen tags."""
+    selected_tags = set(request.form.getlist("selected_tags"))
+    if not selected_tags:
+        return redirect(url_for("quiz_by_tags"))
+
+    max_questions = int(request.form.get("max_questions", 60))
+    selected_questions = sample_questions_by_tags(POOL.questions, selected_tags, max_questions)
+
+    if not selected_questions:
+        return redirect(url_for("quiz_by_tags"))
 
     old_completed_id = session.pop("completed_quiz_id", None)
     if old_completed_id:
