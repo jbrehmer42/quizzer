@@ -68,15 +68,13 @@ def persist_quiz(quiz_session: QuizSession, quiz_id: str) -> None:
     an existing saved quiz or by creating a new one if no saved quiz exists
     for the current quiz session.
     """
-    saved_quiz_id = session.pop("saved_quiz_id", None) or quiz_id
     result = quiz_session.score()
-
-    saved_quiz = QUIZ_STORE.get(saved_quiz_id)
+    saved_quiz = QUIZ_STORE.get(quiz_id)
     if saved_quiz:
         saved_quiz.result = result
     else:
         saved_quiz = SavedQuiz(
-            id=saved_quiz_id,
+            id=quiz_id,
             name=f"Quiz ({result.total} questions)",
             question_ids=[q.id_ for q in quiz_session.questions],
             result=result,

@@ -42,13 +42,9 @@ def prepare_quiz_session(questions: list[ChoiceQuestion], saved_quiz_id: str | N
         _completed_quizzes.pop(old_completed_id, None)
 
     quiz_session = QuizSession.from_settings(questions, settings=_settings)
-    quiz_id = str(uuid.uuid4())
+    quiz_id = str(uuid.uuid4()) if saved_quiz_id is None else saved_quiz_id
     _active_quizzes[quiz_id] = quiz_session
     session["quiz_id"] = quiz_id
-    if saved_quiz_id is not None:
-        session["saved_quiz_id"] = saved_quiz_id
-    else:
-        session.pop("saved_quiz_id", None)
     session["practice_mode"] = request.form.get("mode") == "practice"
     set_quiz_deadline(request, len(questions))
 
