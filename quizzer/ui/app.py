@@ -33,6 +33,26 @@ def inject_appearance():
     return {"dark_mode": _settings.appearance.dark_mode}
 
 
+def prepare_quiz_session(questions: list[ChoiceQuestion], saved_quiz_id: str | None = None) -> None:
+    """Prepare a new quiz session with the given questions and store its properties
+    in the session.
+    """
+    old_completed_id = session.pop("completed_quiz_id", None)
+    if old_completed_id:
+        _completed_quizzes.pop(old_completed_id, None)
+
+    quiz_session = QuizSession.from_settings(questions, settings=_settings)
+    quiz_id = str(uuid.uuid4())
+    _active_quizzes[quiz_id] = quiz_session
+    session["quiz_id"] = quiz_id
+    if saved_quiz_id is not None:
+        session["saved_quiz_id"] = saved_quiz_id
+    else:
+        session.pop("saved_quiz_id", None)
+    session["practice_mode"] = request.form.get("mode") == "practice"
+    set_quiz_deadline(request, len(questions))
+
+
 @app.route("/")
 def home():
     return render_template("index.html", questions=POOL.questions)
@@ -54,19 +74,7 @@ def start_quiz():
     if not selected_questions:
         return redirect(url_for("home"))
 
-    old_completed_id = session.pop("completed_quiz_id", None)
-    if old_completed_id:
-        _completed_quizzes.pop(old_completed_id, None)
-
-    quiz_session = QuizSession.from_settings(selected_questions, settings=_settings)
-    quiz_id = str(uuid.uuid4())
-    _active_quizzes[quiz_id] = quiz_session
-    session["quiz_id"] = quiz_id
-    session["practice_mode"] = request.form.get("mode") == "practice"
-    session.pop("saved_quiz_id", None)
-
-    set_quiz_deadline(request, len(selected_questions))
-
+    prepare_quiz_session(selected_questions)
     return redirect(url_for("quiz_question", index=0))
 
 
@@ -89,19 +97,7 @@ def start_quiz_by_tags():
     if not selected_questions:
         return redirect(url_for("quiz_by_tags"))
 
-    old_completed_id = session.pop("completed_quiz_id", None)
-    if old_completed_id:
-        _completed_quizzes.pop(old_completed_id, None)
-
-    quiz_session = QuizSession.from_settings(selected_questions, settings=_settings)
-    quiz_id = str(uuid.uuid4())
-    _active_quizzes[quiz_id] = quiz_session
-    session["quiz_id"] = quiz_id
-    session["practice_mode"] = request.form.get("mode") == "practice"
-    session.pop("saved_quiz_id", None)
-
-    set_quiz_deadline(request, len(selected_questions))
-
+    prepare_quiz_session(selected_questions)
     return redirect(url_for("quiz_question", index=0))
 
 
@@ -365,21 +361,10 @@ def retake_quiz(quiz_id: str):
             )
         )
 
-    old_completed_id = session.pop("completed_quiz_id", None)
-    if old_completed_id:
-        _completed_quizzes.pop(old_completed_id, None)
-
     available_questions = [
         POOL.get_question_by_id(qid) for qid in saved_quiz.question_ids if qid in POOL
     ]
-    quiz_session = QuizSession.from_settings(available_questions, settings=_settings)
-    active_quiz_id = str(uuid.uuid4())
-    _active_quizzes[active_quiz_id] = quiz_session
-    session["quiz_id"] = active_quiz_id
-    session["saved_quiz_id"] = saved_quiz.id
-    session["practice_mode"] = False
-
-    set_quiz_deadline(request, len(available_questions))
+    prepare_quiz_session(available_questions, saved_quiz_id=quiz_id)
 
     return redirect(url_for("quiz_question", index=0))
 
