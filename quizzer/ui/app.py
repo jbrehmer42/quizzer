@@ -11,7 +11,7 @@ from quizzer.core.quiz_store import QUIZ_STORE
 from quizzer.core.sampling import sample_questions_by_tags
 from quizzer.models.questions import ChoiceQuestion
 from quizzer.models.quiz import QuizSession, QuestionStatus
-from quizzer.models.settings import Settings
+from quizzer.ui.state import STATE
 from quizzer.ui.helpers import (
     handle_question_submission,
     set_quiz_deadline,
@@ -23,14 +23,10 @@ from quizzer.ui.helpers import (
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
-_active_quizzes: dict[str, QuizSession] = {}
-_completed_quizzes: dict[str, QuizSession] = {}
-_settings = Settings()
-
 
 @app.context_processor
 def inject_appearance():
-    return {"dark_mode": _settings.appearance.dark_mode}
+    return {"dark_mode": STATE.settings.appearance.dark_mode}
 
 
 def prepare_quiz_session(questions: list[ChoiceQuestion], saved_quiz_id: str | None = None) -> None:
@@ -39,11 +35,11 @@ def prepare_quiz_session(questions: list[ChoiceQuestion], saved_quiz_id: str | N
     """
     old_completed_id = session.pop("completed_quiz_id", None)
     if old_completed_id:
-        _completed_quizzes.pop(old_completed_id, None)
+        STATE.delete(old_completed_id)
 
-    quiz_session = QuizSession.from_settings(questions, settings=_settings)
+    quiz_session = QuizSession.from_settings(questions, settings=STATE.settings)
     quiz_id = str(uuid.uuid4()) if saved_quiz_id is None else saved_quiz_id
-    _active_quizzes[quiz_id] = quiz_session
+    STATE.put(quiz_id, quiz_session)
     session["quiz_id"] = quiz_id
     session["practice_mode"] = request.form.get("mode") == "practice"
     set_quiz_deadline(request, len(questions))
@@ -57,9 +53,9 @@ def home():
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
     if request.method == "POST":
-        _settings.apply_form(request.form.to_dict())
+        STATE.settings.apply_form(request.form.to_dict())
         return redirect(url_for("home"))
-    return render_template("settings.html", settings=_settings)
+    return render_template("settings.html", settings=STATE.settings)
 
 
 @app.route("/quiz/start", methods=["POST"])
@@ -101,7 +97,7 @@ def start_quiz_by_tags():
 def quiz_question(index):
     """Show the quiz question at the given index, or handle answer submission if POST."""
     quiz_id = session.get("quiz_id")
-    quiz_session = _active_quizzes.get(quiz_id) if quiz_id else None
+    quiz_session = STATE.get(quiz_id) if quiz_id else None
 
     if not quiz_session:
         return redirect(url_for("home"))
@@ -132,17 +128,15 @@ def quiz_question(index):
 def quiz_confirm():
     """Confirm quiz submission and show results on POST."""
     quiz_id = session.get("quiz_id")
-    quiz_session = _active_quizzes.get(quiz_id) if quiz_id else None
+    quiz_session = STATE.get(quiz_id) if quiz_id else None
 
     if not quiz_session or not quiz_id:
         return redirect(url_for("home"))
 
     if request.method == "POST":
-        _completed_quizzes[quiz_id] = quiz_session
         session["completed_quiz_id"] = quiz_id
         session.pop("quiz_deadline", None)
         session.pop("practice_mode", None)
-        _active_quizzes.pop(quiz_id, None)
         persist_quiz(quiz_session, quiz_id)
         session.pop("quiz_id", None)
         return redirect(url_for("quiz_results"))
@@ -162,7 +156,7 @@ def quiz_confirm():
 def quiz_results():
     """Show the results of the most recently completed quiz."""
     quiz_id = session.get("completed_quiz_id")
-    quiz_session = _completed_quizzes.get(quiz_id) if quiz_id else None
+    quiz_session = STATE.get(quiz_id) if quiz_id else None
 
     if not quiz_session:
         return redirect(url_for("home"))
@@ -195,12 +189,8 @@ def quiz_review(index):
     """Show a read-only review of the answer for the question at the given index."""
     practice_mode = session.get("practice_mode", False)
 
-    if practice_mode:
-        quiz_id = session.get("quiz_id")
-        quiz_session = _active_quizzes.get(quiz_id) if quiz_id else None
-    else:
-        quiz_id = session.get("completed_quiz_id")
-        quiz_session = _completed_quizzes.get(quiz_id) if quiz_id else None
+    quiz_id = session.get("quiz_id") if practice_mode else session.get("completed_quiz_id")
+    quiz_session = STATE.get(quiz_id) if quiz_id else None
 
     if not quiz_session:
         return redirect(url_for("home"))
