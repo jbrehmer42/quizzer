@@ -1,6 +1,5 @@
 import json
 import os
-import uuid
 
 from flask import Flask
 from flask import redirect, render_template, request, session, url_for
@@ -10,13 +9,14 @@ from quizzer.core.question_pool import POOL
 from quizzer.core.quiz_store import QUIZ_STORE
 from quizzer.core.sampling import sample_questions_by_tags
 from quizzer.models.questions import ChoiceQuestion
-from quizzer.models.quiz import QuizSession, QuestionStatus
+from quizzer.models.quiz import QuestionStatus
 from quizzer.ui.state import STATE
 from quizzer.ui.helpers import (
     handle_question_submission,
     set_quiz_deadline,
     get_seconds_remaining,
     persist_quiz,
+    prepare_quiz_session,
 )
 
 
@@ -27,26 +27,6 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-producti
 @app.context_processor
 def inject_appearance():
     return {"dark_mode": STATE.settings.appearance.dark_mode}
-
-
-def prepare_quiz_session(
-    questions: list[ChoiceQuestion],
-    saved_quiz_id: str | None = None,
-    practice_mode: bool = False,
-) -> None:
-    """Prepare a new quiz session with the given questions and store its properties
-    in the session.
-    """
-    old_completed_id = session.pop("completed_quiz_id", None)
-    if old_completed_id:
-        STATE.delete(old_completed_id)
-
-    quiz_session = QuizSession.from_settings(questions, settings=STATE.settings)
-    quiz_id = str(uuid.uuid4()) if saved_quiz_id is None else saved_quiz_id
-    STATE.put(quiz_id, quiz_session)
-    session["quiz_id"] = quiz_id
-    session["practice_mode"] = practice_mode
-    set_quiz_deadline(request, len(questions))
 
 
 @app.route("/")
@@ -72,6 +52,7 @@ def start_quiz():
 
     practice_mode = request.form.get("mode") == "practice"
     prepare_quiz_session(selected_questions, practice_mode=practice_mode)
+    set_quiz_deadline(request, len(selected_questions))
     return redirect(url_for("quiz_question", index=0))
 
 
@@ -96,6 +77,7 @@ def start_quiz_by_tags():
 
     practice_mode = request.form.get("mode") == "practice"
     prepare_quiz_session(selected_questions, practice_mode=practice_mode)
+    set_quiz_deadline(request, len(selected_questions))
     return redirect(url_for("quiz_question", index=0))
 
 
@@ -357,8 +339,8 @@ def retake_quiz(quiz_id: str):
         POOL.get_question_by_id(qid) for qid in saved_quiz.question_ids if qid in POOL
     ]
     practice_mode = request.form.get("mode") == "practice"
-    prepare_quiz_session(available_questions, saved_quiz_id=quiz_id, practice_mode=practice_mode)
-
+    prepare_quiz_session(available_questions, quiz_id=quiz_id, practice_mode=practice_mode)
+    set_quiz_deadline(request, len(available_questions))
     return redirect(url_for("quiz_question", index=0))
 
 

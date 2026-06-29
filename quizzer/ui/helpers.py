@@ -1,10 +1,13 @@
 import time
+import uuid
 
 from flask import Request, session, url_for, redirect
 from werkzeug.wrappers import Response
 
-from quizzer.models.quiz import QuizSession, QuestionStatus, ScoringResult
+from quizzer.models.questions import ChoiceQuestion
+from quizzer.models.quiz import QuizSession, QuestionStatus
 from quizzer.core.quiz_store import QUIZ_STORE, SavedQuiz
+from quizzer.ui.state import STATE
 
 
 def _record_answer(quiz_session: QuizSession, index: int, req: Request) -> None:
@@ -80,3 +83,22 @@ def persist_quiz(quiz_session: QuizSession, quiz_id: str) -> None:
             result=result,
         )
     QUIZ_STORE.save_quiz(saved_quiz)
+
+
+def prepare_quiz_session(
+    questions: list[ChoiceQuestion],
+    quiz_id: str | None = None,
+    practice_mode: bool = False,
+) -> None:
+    """Prepare a new quiz session with the given questions and store its properties
+    in the session.
+    """
+    old_completed_id = session.pop("completed_quiz_id", None)
+    if old_completed_id:
+        STATE.delete(old_completed_id)
+
+    quiz_session = QuizSession.from_settings(questions, settings=STATE.settings)
+    quiz_id = str(uuid.uuid4()) if quiz_id is None else quiz_id
+    STATE.put(quiz_id, quiz_session)
+    session["quiz_id"] = quiz_id
+    session["practice_mode"] = practice_mode    
