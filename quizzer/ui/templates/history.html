@@ -45,6 +45,10 @@
           <form action="{{ url_for('retake_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline">
             <button type="submit" class="btn btn-sm">Retake</button>
           </form>
+          <form action="{{ url_for('retake_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline">
+            <input type="hidden" name="mode" value="practice">
+            <button type="submit" class="btn btn-sm">Practice</button>
+          </form>
           <form action="{{ url_for('delete_saved_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline"
                 onsubmit="return confirm('Delete this saved quiz?')">
             <button type="submit" class="btn btn-secondary btn-sm btn--danger">Delete</button>

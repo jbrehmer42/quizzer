@@ -29,7 +29,11 @@ def inject_appearance():
     return {"dark_mode": STATE.settings.appearance.dark_mode}
 
 
-def prepare_quiz_session(questions: list[ChoiceQuestion], saved_quiz_id: str | None = None) -> None:
+def prepare_quiz_session(
+    questions: list[ChoiceQuestion],
+    saved_quiz_id: str | None = None,
+    practice_mode: bool = False,
+) -> None:
     """Prepare a new quiz session with the given questions and store its properties
     in the session.
     """
@@ -41,7 +45,7 @@ def prepare_quiz_session(questions: list[ChoiceQuestion], saved_quiz_id: str | N
     quiz_id = str(uuid.uuid4()) if saved_quiz_id is None else saved_quiz_id
     STATE.put(quiz_id, quiz_session)
     session["quiz_id"] = quiz_id
-    session["practice_mode"] = request.form.get("mode") == "practice"
+    session["practice_mode"] = practice_mode
     set_quiz_deadline(request, len(questions))
 
 
@@ -66,7 +70,8 @@ def start_quiz():
     if not selected_questions:
         return redirect(url_for("home"))
 
-    prepare_quiz_session(selected_questions)
+    practice_mode = request.form.get("mode") == "practice"
+    prepare_quiz_session(selected_questions, practice_mode=practice_mode)
     return redirect(url_for("quiz_question", index=0))
 
 
@@ -89,7 +94,8 @@ def start_quiz_by_tags():
     if not selected_questions:
         return redirect(url_for("quiz_by_tags"))
 
-    prepare_quiz_session(selected_questions)
+    practice_mode = request.form.get("mode") == "practice"
+    prepare_quiz_session(selected_questions, practice_mode=practice_mode)
     return redirect(url_for("quiz_question", index=0))
 
 
@@ -350,7 +356,8 @@ def retake_quiz(quiz_id: str):
     available_questions = [
         POOL.get_question_by_id(qid) for qid in saved_quiz.question_ids if qid in POOL
     ]
-    prepare_quiz_session(available_questions, saved_quiz_id=quiz_id)
+    practice_mode = request.form.get("mode") == "practice"
+    prepare_quiz_session(available_questions, saved_quiz_id=quiz_id, practice_mode=practice_mode)
 
     return redirect(url_for("quiz_question", index=0))
 
