@@ -3,50 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quizzer — Quiz by Tags</title>
+  <title>Quizzer — Create Quiz</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles_dark.css') }}">
 </head>
 <body class="index-body{% if dark_mode %} dark{% endif %}">
   <div class="page-header">
-    <h1>Quizzer — Quiz by Tags</h1>
+    <h1>Create Quiz</h1>
     <div>
       <a href="{{ url_for('home') }}" class="btn btn-secondary btn-sm">&larr; Back</a>
     </div>
   </div>
-  <p class="subtitle">Select tags to generate a quiz from. Questions will be randomly chosen with proportional representation of each tag.</p>
+  <p class="subtitle">Select the questions you want to include in your quiz, then click <strong>Start Quiz</strong> or <strong>Start Practice</strong>.</p>
 
-  {% if tags %}
+  {% if questions %}
   <div class="controls">
     <button type="button" onclick="selectAll()">Select all</button>
     <button type="button" onclick="deselectAll()">Deselect all</button>
-    <span class="selected-count" id="count-label">0 / {{ tags | length }} selected</span>
+    <span class="selected-count" id="count-label">0 / {{ questions | length }} selected</span>
   </div>
 
-  <form action="{{ url_for('start_quiz_by_tags') }}" method="post">
-    <ul class="question-list" id="tag-list">
-      {% for tag, count in tags.items() %}
+  <form action="{{ url_for('start_quiz') }}" method="post">
+    <ul class="question-list" id="question-list">
+      {% for q in questions %}
       <li>
         <label class="question-card" id="card-{{ loop.index }}">
-          <input type="checkbox" name="selected_tags" value="{{ tag }}"
+          <input type="checkbox" name="question_ids" value="{{ q.id_ }}"
                  onchange="onToggle(this, 'card-{{ loop.index }}')" />
           <div class="question-body">
-            <p class="question-text-preview">{{ tag }}</p>
+            <p class="question-text-preview">{{ q.question }}</p>
             <div class="question-meta">
-              <span class="badge">{{ count }} question{{ 's' if count != 1 else '' }}</span>
+              <span class="badge">{{ q.question_type }}</span>
             </div>
           </div>
         </label>
       </li>
       {% endfor %}
     </ul>
-
-    <div class="timer-option">
-      <label>
-        Maximum number of questions:
-        <input type="number" name="max_questions" id="max-questions" value="80" min="1" max="9999" />
-      </label>
-    </div>
 
     <div class="timer-option">
       <label class="timer-toggle">
@@ -58,8 +51,9 @@
         <label for="minutes-per-question">
           Minutes per question:
           <input type="number" id="minutes-per-question" name="minutes_per_question"
-                 value="4" min="1" max="999" />
+                 value="4" min="1" max="999" oninput="updateTotalTime()" />
         </label>
+        <span class="timer-total" id="timer-total"></span>
       </div>
     </div>
 
@@ -68,35 +62,36 @@
               title="Answer all questions, then see your results at the end.">Start Quiz</button>
       <button type="submit" name="mode" value="practice" class="btn-start btn-practice" id="practice-btn" disabled
               title="See the correct answer and explanation after each question.">Start Practice</button>
-      <span id="start-label" class="start-label">Select at least one tag to start.</span>
+      <span id="start-label" class="start-label">Select at least one question to start.</span>
     </div>
   </form>
 
   <script>
-    const totalTags = {{ tags | length }};
+    const total = {{ questions | length }};
     function updateUI() {
-      const checked = document.querySelectorAll('input[type="checkbox"][name="selected_tags"]:checked').length;
-      document.getElementById('count-label').textContent = `${checked} / ${totalTags} selected`;
+      const checked = document.querySelectorAll('input[type="checkbox"][name="question_ids"]:checked').length;
+      document.getElementById('count-label').textContent = `${checked} / ${total} selected`;
       const btn = document.getElementById('start-btn');
       const practiceBtn = document.getElementById('practice-btn');
       const lbl = document.getElementById('start-label');
       btn.disabled = checked === 0;
       practiceBtn.disabled = checked === 0;
-      lbl.textContent = checked === 0 ? 'Select at least one tag to start.' : `${checked} tag${checked === 1 ? '' : 's'} selected.`;
+      lbl.textContent = checked === 0 ? 'Select at least one question to start.' : `${checked} question${checked === 1 ? '' : 's'} selected.`;
+      updateTotalTime();
     }
     function onToggle(checkbox, cardId) {
       document.getElementById(cardId).classList.toggle('selected', checkbox.checked);
       updateUI();
     }
     function selectAll() {
-      document.querySelectorAll('input[type="checkbox"][name="selected_tags"]').forEach((cb) => {
+      document.querySelectorAll('input[type="checkbox"][name="question_ids"]').forEach((cb, i) => {
         cb.checked = true;
         cb.closest('.question-card').classList.add('selected');
       });
       updateUI();
     }
     function deselectAll() {
-      document.querySelectorAll('input[type="checkbox"][name="selected_tags"]').forEach(cb => {
+      document.querySelectorAll('input[type="checkbox"][name="question_ids"]').forEach(cb => {
         cb.checked = false;
         cb.closest('.question-card').classList.remove('selected');
       });
@@ -104,10 +99,21 @@
     }
     function onTimerToggle(enabled) {
       document.getElementById('timer-settings').hidden = !enabled;
+      if (enabled) updateTotalTime();
+    }
+    function updateTotalTime() {
+      if (document.getElementById('enable-timer').checked) {
+        const mins = parseFloat(document.getElementById('minutes-per-question').value) || 0;
+        const checked = document.querySelectorAll('input[type="checkbox"][name="question_ids"]:checked').length;
+        const totalMins = Math.round(mins * checked);
+        document.getElementById('timer-total').textContent = checked > 0
+          ? `Total: ${totalMins} min for ${checked} question${checked === 1 ? '' : 's'}`
+          : '';
+      }
     }
   </script>
   {% else %}
-  <p class="empty">No tags found in the question pool.</p>
+  <p class="empty">No questions found in the question pool.</p>
   {% endif %}
 </body>
 </html>

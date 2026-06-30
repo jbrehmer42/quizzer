@@ -69,6 +69,28 @@ body.dark {
 .dark .btn--secondary { background: #4b5563; }
 .dark .btn--secondary:hover { background: #6b7280; }
 
+/* Home menu */
+.dark .settings-icon-btn {
+  background: #2d2d2d;
+  border-color: #555;
+  color: #9a9a9a;
+}
+.dark .settings-icon-btn:hover {
+  background: #3a3a3a;
+  border-color: #777;
+  color: #d4d4d4;
+}
+.dark .home-menu-item {
+  border-color: #3e3e3e;
+  background: #252526;
+}
+.dark .home-menu-item:hover {
+  border-color: #4a7cdc;
+  background: #1c2a44;
+}
+.dark .home-menu-title { color: #6aa3f7; }
+.dark .home-menu-hint { color: #888; }
+
 /* Quiz page */
 .dark .question-counter { color: #9a9a9a; }
 .dark .timer { color: #d4d4d4; }

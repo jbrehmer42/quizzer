@@ -32,7 +32,12 @@ def inject_appearance():
 
 @app.route("/")
 def home():
-    return render_template("index.html", questions=POOL.questions)
+    return render_template("index.html")
+
+
+@app.route("/quiz/create")
+def create_quiz():
+    return render_template("create_quiz.html", questions=POOL.questions)
 
 
 @app.route("/settings", methods=["GET", "POST"])
@@ -49,7 +54,7 @@ def start_quiz():
     selected_questions = [q for q in POOL.questions if q.id_ in selected_ids]
 
     if not selected_questions:
-        return redirect(url_for("home"))
+        return redirect(url_for("create_quiz"))
 
     practice_mode = request.form.get("mode") == "practice"
     prepare_quiz_session(selected_questions, practice_mode=practice_mode)

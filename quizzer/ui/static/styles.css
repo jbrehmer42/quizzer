@@ -107,6 +107,7 @@ body {
   max-width: 860px;
   margin: 4rem auto;
   text-align: center;
+  position: relative;
 }
 
 h1 { margin: 0; }
@@ -826,5 +827,69 @@ a.btn:hover { background: #3a6acc; }
   border-radius: 6px;
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
+}
+
+/* ── Home menu ─────────────────────────────────────────────── */
+
+.home-header {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+}
+
+.settings-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: #555;
+  text-decoration: none;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+.settings-icon-btn:hover {
+  background: #e8e8e8;
+  border-color: #aaa;
+  color: #333;
+}
+
+.home-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 420px;
+  margin: 2.5rem auto 0;
+  text-align: left;
+}
+
+.home-menu-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.1s, border-color 0.1s;
+}
+.home-menu-item:hover {
+  border-color: #4a7cdc;
+  background: #eef3fd;
+}
+
+.home-menu-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #4a7cdc;
+}
+
+.home-menu-hint {
+  font-size: 0.85rem;
+  color: #666;
 }
 

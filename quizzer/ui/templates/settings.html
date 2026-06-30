@@ -8,7 +8,12 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles_dark.css') }}">
 </head>
 <body class="index-body{% if dark_mode %} dark{% endif %}">
-  <h1>Settings</h1>
+  <div class="page-header">
+    <h1>Settings</h1>
+    <div>
+      <a href="{{ url_for('home') }}" class="btn btn-secondary btn-sm">&larr; Back</a>
+    </div>
+  </div>
   <p class="subtitle">Configure how quizzes are generated.</p>
 
   <form action="{{ url_for('settings') }}" method="post">
