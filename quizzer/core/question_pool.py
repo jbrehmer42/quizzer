@@ -55,6 +55,15 @@ class QuestionPool:
             raise ValueError(f"Got questions {q} for ID {question_id}")
         return q[0]
 
+    def update_question(self, updated: ChoiceQuestion) -> None:
+        """Persist an updated question to its source file and replace it in memory."""
+        file_path = self.get_question_path_by_id(updated.id_)
+        file_path.write_text(updated.model_dump_json(indent=2) + "\n")
+        for i, q in enumerate(self.questions):
+            if q.id_ == updated.id_:
+                self.questions[i] = updated
+                break
+
     def __contains__(self, item: str | ChoiceQuestion) -> bool:
         """Check if a question with the given ID exists in the pool"""
         if isinstance(item, ChoiceQuestion):

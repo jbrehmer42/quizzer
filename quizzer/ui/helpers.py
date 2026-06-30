@@ -1,10 +1,12 @@
 import time
 import uuid
 
+from typing import Any
 from flask import Request, session, url_for, redirect
 from werkzeug.wrappers import Response
+from werkzeug.datastructures import MultiDict
 
-from quizzer.models.questions import ChoiceQuestion
+from quizzer.models.questions import ChoiceQuestion, ChoiceAnswer
 from quizzer.models.quiz import QuizSession, QuestionStatus
 from quizzer.core.quiz_store import QUIZ_STORE, SavedQuiz
 from quizzer.ui.state import STATE
@@ -83,6 +85,44 @@ def persist_quiz(quiz_session: QuizSession, quiz_id: str) -> None:
             result=result,
         )
     QUIZ_STORE.save_quiz(saved_quiz)
+
+
+def parse_question_form(form: MultiDict, question: ChoiceQuestion) -> dict[str, Any]:
+    """Build a question data dict from the edit form, preserving non-editable fields.
+
+    Answer correctness is taken from the original question and never from the form,
+    so editing can never change which answers are correct.
+    """
+    answers: list[ChoiceAnswer] = []
+    i = 0
+    while f"answer_text_{i}" in form:
+        answers.append(ChoiceAnswer(
+            text=form[f"answer_text_{i}"],
+            correct=question.answers[i].correct,
+            rationale=form.get(f"answer_rationale_{i}", ""),
+        ))
+        i += 1
+
+    data = question.model_dump()
+    data.update(
+        question=form.get("question_text", ""),
+        answers=answers,
+        tags=[t.strip() for t in form.get("tags", "").split(",") if t.strip()],
+        resources=[r.strip() for r in form.get("resources", "").splitlines() if r.strip()],
+        explanation=form.get("explanation", ""),
+    )
+    return data
+
+
+def question_data_to_form_data(data: dict) -> dict[str, str]:
+    """Convert a question data dict into the structure expected by the edit template."""
+    return {
+        "question_text": data["question"],
+        "answers": data["answers"],
+        "tags": ", ".join(data["tags"]),
+        "explanation": data["explanation"],
+        "resources": "\n".join(data["resources"]),
+    }
 
 
 def prepare_quiz_session(

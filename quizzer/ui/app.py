@@ -1,4 +1,3 @@
-import json
 import os
 
 from flask import Flask
@@ -17,6 +16,8 @@ from quizzer.ui.helpers import (
     get_seconds_remaining,
     persist_quiz,
     prepare_quiz_session,
+    parse_question_form,
+    question_data_to_form_data,
 )
 
 
@@ -207,104 +208,32 @@ def edit_list():
 def edit_question(question_id: str):
     """Edit a question via individual form fields."""
     question = POOL.get_question_by_id(question_id)
-    if not question:
-        return redirect(url_for("edit_list"))
-
-    # Get referrer info from query parameters
-    referrer = request.args.get("referrer", "edit_list")
-    quiz_index = request.args.get("quiz_index", type=int)
-
-    error = None
-    form_data: dict | None = None
+    context = {
+        "referrer": request.args.get("referrer", "edit_list"),
+        "quiz_index": request.args.get("quiz_index", type=int),
+    }
 
     if request.method == "POST":
-        form = request.form
-
-        # Reconstruct answers from indexed form fields
-        answers = []
-        i = 0
-        while f"answer_text_{i}" in form:
-            answers.append({
-                "text": form[f"answer_text_{i}"],
-                "correct": f"answer_correct_{i}" in form,
-                "rationale": form.get(f"answer_rationale_{i}", ""),
-            })
-            i += 1
-
-        # Build the full question dict, preserving non-editable fields
-        tags_raw = form.get("tags", "")
-        tags = [t.strip() for t in tags_raw.split(",") if t.strip()]
-
-        resources_raw = form.get("resources", "")
-        resources = [r.strip() for r in resources_raw.splitlines() if r.strip()]
-
-        data = {
-            "id_": question.id_,
-            "question": form.get("question_text", ""),
-            "answers": answers,
-            "tags": tags,
-            "question_type": question.question_type,
-            "explanation": form.get("explanation", ""),
-            "version": question.version,
-            "resources": resources,
-            "meta": question.meta.model_dump(),
-        }
-
-        # Keep form data for re-rendering on error
-        form_data = {
-            "question_text": data["question"],
-            "answers": answers,
-            "tags": tags_raw,
-            "explanation": data["explanation"],
-            "resources": resources_raw,
-        }
-
+        data = parse_question_form(request.form, question)
         try:
             updated = ChoiceQuestion.model_validate(data)
         except ValidationError as e:
-            error = str(e)
             return render_template(
                 "edit_question.html",
                 question=question,
-                form_data=form_data,
-                error=error,
-                referrer=referrer,
-                quiz_index=quiz_index,
+                form_data=question_data_to_form_data(data),
+                error=str(e),
+                **context,
             )
-
-        # Persist to the original source path for this question.
-        file_path = POOL.get_question_path_by_id(updated.id_)
-        file_path.write_text(
-            json.dumps(data, indent=2, ensure_ascii=False, default=str) + "\n"
-        )
-
-        # Update the in-memory pool
-        for i, q in enumerate(POOL.questions):
-            if q.id_ == updated.id_:
-                POOL.questions[i] = updated
-                break
-
+        POOL.update_question(updated)
         return redirect(url_for("edit_question", question_id=updated.id_))
-
-    # GET: populate form_data from the current question
-    form_data = {
-        "question_text": question.question,
-        "answers": [
-            {"text": a.text, "correct": a.correct, "rationale": a.rationale}
-            for a in question.answers
-        ],
-        "tags": ", ".join(question.tags),
-        "explanation": question.explanation,
-        "resources": "\n".join(question.resources),
-    }
 
     return render_template(
         "edit_question.html",
         question=question,
-        form_data=form_data,
-        error=error,
-        referrer=referrer,
-        quiz_index=quiz_index,
+        form_data=question_data_to_form_data(question.model_dump()),
+        error=None,
+        **context,
     )
 
 
