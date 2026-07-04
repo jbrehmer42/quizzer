@@ -72,6 +72,9 @@ def persist_quiz(quiz_session: QuizSession, quiz_id: str) -> None:
     """Persist the quiz and its result in the quiz store, either by updating
     an existing saved quiz or by creating a new one if no saved quiz exists
     for the current quiz session.
+
+    Also records the outcome of each answered question in the per-question
+    history so users can track which questions they struggle with.
     """
     result = quiz_session.score()
     saved_quiz = QUIZ_STORE.get(quiz_id)
@@ -84,6 +87,10 @@ def persist_quiz(quiz_session: QuizSession, quiz_id: str) -> None:
             question_ids=[q.id_ for q in quiz_session.questions],
             result=result,
         )
+
+    for question, outcome in zip(quiz_session.questions, result.outcomes, strict=True):
+        QUIZ_STORE.record_question_attempt(question.id_, outcome)
+
     QUIZ_STORE.save_quiz(saved_quiz)
 
 
