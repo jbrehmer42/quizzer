@@ -18,3 +18,8 @@ quizzer = "quizzer.main:main"
 
 [tool.setuptools]
 py-modules = ["quizzer"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
