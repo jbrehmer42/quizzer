@@ -290,6 +290,22 @@ h1 { margin: 0; }
   color: #555;
 }
 
+.name-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.name-label input[type="text"] {
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
 
 .info-box {
   border: 1px solid #ddd;

@@ -57,7 +57,11 @@ def start_quiz():
         return redirect(url_for("create_quiz"))
 
     practice_mode = request.form.get("mode") == "practice"
-    prepare_quiz_session(selected_questions, practice_mode=practice_mode)
+    prepare_quiz_session(
+        selected_questions,
+        practice_mode=practice_mode,
+        quiz_name=request.form.get("quiz_name"),
+    )
     set_quiz_deadline(request, len(selected_questions))
     return redirect(url_for("quiz_question", index=0))
 
@@ -82,7 +86,11 @@ def start_quiz_by_tags():
         return redirect(url_for("quiz_by_tags"))
 
     practice_mode = request.form.get("mode") == "practice"
-    prepare_quiz_session(selected_questions, practice_mode=practice_mode)
+    prepare_quiz_session(
+        selected_questions,
+        practice_mode=practice_mode,
+        quiz_name=request.form.get("quiz_name"),
+    )
     set_quiz_deadline(request, len(selected_questions))
     return redirect(url_for("quiz_question", index=0))
 
@@ -133,8 +141,8 @@ def quiz_confirm():
         session.pop("practice_mode", None)
         persist_quiz(quiz_session, quiz_id)
         session.pop("quiz_id", None)
+        session.pop("quiz_name", None)
         return redirect(url_for("quiz_results"))
-
     total = quiz_session.total_questions
     return render_template(
         "quiz_confirm.html",

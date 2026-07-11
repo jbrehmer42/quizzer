@@ -81,9 +81,10 @@ def persist_quiz(quiz_session: QuizSession, quiz_id: str) -> None:
     if saved_quiz:
         saved_quiz.result = result
     else:
+        quiz_name = session.get("quiz_name")
         saved_quiz = SavedQuiz(
             id=quiz_id,
-            name=f"Quiz ({result.total} questions)",
+            name=quiz_name or f"Quiz ({result.total} questions)",
             question_ids=[q.id_ for q in quiz_session.questions],
             result=result,
         )
@@ -136,6 +137,7 @@ def prepare_quiz_session(
     questions: list[ChoiceQuestion],
     quiz_id: str | None = None,
     practice_mode: bool = False,
+    quiz_name: str | None = None,
 ) -> None:
     """Prepare a new quiz session with the given questions and store its properties
     in the session.
@@ -148,4 +150,5 @@ def prepare_quiz_session(
     quiz_id = str(uuid.uuid4()) if quiz_id is None else quiz_id
     STATE.put(quiz_id, quiz_session)
     session["quiz_id"] = quiz_id
-    session["practice_mode"] = practice_mode    
+    session["practice_mode"] = practice_mode
+    session["quiz_name"] = (quiz_name or "").strip()    

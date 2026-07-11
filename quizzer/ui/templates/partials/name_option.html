@@ -1,0 +1,18 @@
+<div class="timer-option name-option">
+  <label class="name-label" for="quiz-name">
+    Quiz name:
+    <input type="text" id="quiz-name" name="quiz_name" maxlength="200"
+           autocomplete="off" />
+  </label>
+</div>
+<script>
+  (function () {
+    var input = document.getElementById('quiz-name');
+    if (input && !input.value) {
+      var now = new Date();
+      var date = now.toLocaleDateString();
+      var time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      input.value = 'My Quiz ' + date + ' ' + time;
+    }
+  })();
+</script>

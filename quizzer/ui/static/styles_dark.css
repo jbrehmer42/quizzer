@@ -48,6 +48,13 @@ body.dark {
 }
 .dark .timer-total { color: #9a9a9a; }
 
+.dark .name-label { color: #d4d4d4; }
+.dark .name-label input[type="text"] {
+  background: #1e1e1e;
+  border-color: #555;
+  color: #d4d4d4;
+}
+
 /* Settings page */
 .dark .settings-section-title { color: #9a9a9a; }
 .dark .settings-group { border-color: #3e3e3e; }
