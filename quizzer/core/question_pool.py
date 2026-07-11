@@ -58,7 +58,7 @@ class QuestionPool:
     def update_question(self, updated: ChoiceQuestion) -> None:
         """Persist an updated question to its source file and replace it in memory."""
         file_path = self.get_question_path_by_id(updated.id_)
-        file_path.write_text(updated.model_dump_json(indent=2) + "\n")
+        file_path.write_text(updated.model_dump_json(indent=2))
         for i, q in enumerate(self.questions):
             if q.id_ == updated.id_:
                 self.questions[i] = updated

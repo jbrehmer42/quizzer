@@ -70,9 +70,16 @@
     <div class="question-explanation">
       <strong>Explanation</strong>
       <p>{{ question.explanation }}</p>
+      {% if question.resources %}
+      <strong style="margin-top: 0.5rem;">Resources</strong>
+        <ul>
+          {% for resource in question.resources %}
+            <li><a href="{{ resource }}" target="_blank" rel="noopener noreferrer">{{ resource }}</a></li>
+          {% endfor %}
+        </ul>
+      {% endif %}
     </div>
   {% endif %}
-
 
 </body>
 </html>
