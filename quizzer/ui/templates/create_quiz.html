@@ -1,12 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quizzer — Create Quiz</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles_dark.css') }}">
-</head>
+{% set page_title = 'Quizzer — Create Quiz' %}
+{% include 'partials/head.html' %}
 <body class="index-body{% if dark_mode %} dark{% endif %}">
   <div class="page-header">
     <h1>Create Quiz</h1>
@@ -17,11 +12,8 @@
   <p class="subtitle">Select the questions you want to include in your quiz, then click <strong>Start Quiz</strong> or <strong>Start Practice</strong>.</p>
 
   {% if questions %}
-  <div class="controls">
-    <button type="button" onclick="selectAll()">Select all</button>
-    <button type="button" onclick="deselectAll()">Deselect all</button>
-    <span class="selected-count" id="count-label">0 / {{ questions | length }} selected</span>
-  </div>
+  {% set item_count = questions | length %}
+  {% include 'partials/select_controls.html' %}
 
   <form action="{{ url_for('start_quiz') }}" method="post">
     <ul class="question-list" id="question-list">
@@ -41,77 +33,22 @@
       {% endfor %}
     </ul>
 
-    <div class="timer-option">
-      <label class="timer-toggle">
-        <input type="checkbox" id="enable-timer" name="enable_timer" value="1"
-               onchange="onTimerToggle(this.checked)" />
-        Set a time limit
-      </label>
-      <div id="timer-settings" class="timer-settings" hidden>
-        <label for="minutes-per-question">
-          Minutes per question:
-          <input type="number" id="minutes-per-question" name="minutes_per_question"
-                 value="4" min="1" max="999" oninput="updateTotalTime()" />
-        </label>
-        <span class="timer-total" id="timer-total"></span>
-      </div>
-    </div>
+    {% set show_total_time = True %}
+    {% include 'partials/timer_option.html' %}
 
-    <div class="start-bar">
-      <button type="submit" name="mode" value="classic" class="btn-start" id="start-btn" disabled
-              title="Answer all questions, then see your results at the end.">Start Quiz</button>
-      <button type="submit" name="mode" value="practice" class="btn-start btn-practice" id="practice-btn" disabled
-              title="See the correct answer and explanation after each question.">Start Practice</button>
-      <span id="start-label" class="start-label">Select at least one question to start.</span>
-    </div>
+    {% set noun = 'question' %}
+    {% include 'partials/start_bar.html' %}
   </form>
 
   <script>
-    const total = {{ questions | length }};
-    function updateUI() {
-      const checked = document.querySelectorAll('input[type="checkbox"][name="question_ids"]:checked').length;
-      document.getElementById('count-label').textContent = `${checked} / ${total} selected`;
-      const btn = document.getElementById('start-btn');
-      const practiceBtn = document.getElementById('practice-btn');
-      const lbl = document.getElementById('start-label');
-      btn.disabled = checked === 0;
-      practiceBtn.disabled = checked === 0;
-      lbl.textContent = checked === 0 ? 'Select at least one question to start.' : `${checked} question${checked === 1 ? '' : 's'} selected.`;
-      updateTotalTime();
-    }
-    function onToggle(checkbox, cardId) {
-      document.getElementById(cardId).classList.toggle('selected', checkbox.checked);
-      updateUI();
-    }
-    function selectAll() {
-      document.querySelectorAll('input[type="checkbox"][name="question_ids"]').forEach((cb, i) => {
-        cb.checked = true;
-        cb.closest('.question-card').classList.add('selected');
-      });
-      updateUI();
-    }
-    function deselectAll() {
-      document.querySelectorAll('input[type="checkbox"][name="question_ids"]').forEach(cb => {
-        cb.checked = false;
-        cb.closest('.question-card').classList.remove('selected');
-      });
-      updateUI();
-    }
-    function onTimerToggle(enabled) {
-      document.getElementById('timer-settings').hidden = !enabled;
-      if (enabled) updateTotalTime();
-    }
-    function updateTotalTime() {
-      if (document.getElementById('enable-timer').checked) {
-        const mins = parseFloat(document.getElementById('minutes-per-question').value) || 0;
-        const checked = document.querySelectorAll('input[type="checkbox"][name="question_ids"]:checked').length;
-        const totalMins = Math.round(mins * checked);
-        document.getElementById('timer-total').textContent = checked > 0
-          ? `Total: ${totalMins} min for ${checked} question${checked === 1 ? '' : 's'}`
-          : '';
-      }
-    }
+    window.quizSelectConfig = {
+      checkboxName: 'question_ids',
+      noun: 'question',
+      total: {{ questions | length }},
+      showTotalTime: true,
+    };
   </script>
+  <script src="{{ url_for('static', filename='quiz_select.js') }}"></script>
   {% else %}
   <p class="empty">No questions found in the question pool.</p>
   {% endif %}

@@ -1,12 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quizzer — Quiz by Tags</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles_dark.css') }}">
-</head>
+{% set page_title = 'Quizzer — Quiz by Tags' %}
+{% include 'partials/head.html' %}
 <body class="index-body{% if dark_mode %} dark{% endif %}">
   <div class="page-header">
     <h1>Quizzer — Quiz by Tags</h1>
@@ -17,11 +12,8 @@
   <p class="subtitle">Select tags to generate a quiz from. Questions will be randomly chosen with proportional representation of each tag.</p>
 
   {% if tags %}
-  <div class="controls">
-    <button type="button" onclick="selectAll()">Select all</button>
-    <button type="button" onclick="deselectAll()">Deselect all</button>
-    <span class="selected-count" id="count-label">0 / {{ tags | length }} selected</span>
-  </div>
+  {% set item_count = tags | length %}
+  {% include 'partials/select_controls.html' %}
 
   <form action="{{ url_for('start_quiz_by_tags') }}" method="post">
     <ul class="question-list" id="tag-list">
@@ -48,64 +40,21 @@
       </label>
     </div>
 
-    <div class="timer-option">
-      <label class="timer-toggle">
-        <input type="checkbox" id="enable-timer" name="enable_timer" value="1"
-               onchange="onTimerToggle(this.checked)" />
-        Set a time limit
-      </label>
-      <div id="timer-settings" class="timer-settings" hidden>
-        <label for="minutes-per-question">
-          Minutes per question:
-          <input type="number" id="minutes-per-question" name="minutes_per_question"
-                 value="4" min="1" max="999" />
-        </label>
-      </div>
-    </div>
+    {% include 'partials/timer_option.html' %}
 
-    <div class="start-bar">
-      <button type="submit" name="mode" value="classic" class="btn-start" id="start-btn" disabled
-              title="Answer all questions, then see your results at the end.">Start Quiz</button>
-      <button type="submit" name="mode" value="practice" class="btn-start btn-practice" id="practice-btn" disabled
-              title="See the correct answer and explanation after each question.">Start Practice</button>
-      <span id="start-label" class="start-label">Select at least one tag to start.</span>
-    </div>
+    {% set noun = 'tag' %}
+    {% include 'partials/start_bar.html' %}
   </form>
 
   <script>
-    const totalTags = {{ tags | length }};
-    function updateUI() {
-      const checked = document.querySelectorAll('input[type="checkbox"][name="selected_tags"]:checked').length;
-      document.getElementById('count-label').textContent = `${checked} / ${totalTags} selected`;
-      const btn = document.getElementById('start-btn');
-      const practiceBtn = document.getElementById('practice-btn');
-      const lbl = document.getElementById('start-label');
-      btn.disabled = checked === 0;
-      practiceBtn.disabled = checked === 0;
-      lbl.textContent = checked === 0 ? 'Select at least one tag to start.' : `${checked} tag${checked === 1 ? '' : 's'} selected.`;
-    }
-    function onToggle(checkbox, cardId) {
-      document.getElementById(cardId).classList.toggle('selected', checkbox.checked);
-      updateUI();
-    }
-    function selectAll() {
-      document.querySelectorAll('input[type="checkbox"][name="selected_tags"]').forEach((cb) => {
-        cb.checked = true;
-        cb.closest('.question-card').classList.add('selected');
-      });
-      updateUI();
-    }
-    function deselectAll() {
-      document.querySelectorAll('input[type="checkbox"][name="selected_tags"]').forEach(cb => {
-        cb.checked = false;
-        cb.closest('.question-card').classList.remove('selected');
-      });
-      updateUI();
-    }
-    function onTimerToggle(enabled) {
-      document.getElementById('timer-settings').hidden = !enabled;
-    }
+    window.quizSelectConfig = {
+      checkboxName: 'selected_tags',
+      noun: 'tag',
+      total: {{ tags | length }},
+      showTotalTime: false,
+    };
   </script>
+  <script src="{{ url_for('static', filename='quiz_select.js') }}"></script>
   {% else %}
   <p class="empty">No tags found in the question pool.</p>
   {% endif %}

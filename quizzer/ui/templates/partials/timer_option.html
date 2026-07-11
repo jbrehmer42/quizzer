@@ -1,0 +1,17 @@
+<div class="timer-option">
+  <label class="timer-toggle">
+    <input type="checkbox" id="enable-timer" name="enable_timer" value="1"
+           onchange="onTimerToggle(this.checked)" />
+    Set a time limit
+  </label>
+  <div id="timer-settings" class="timer-settings" hidden>
+    <label for="minutes-per-question">
+      Minutes per question:
+      <input type="number" id="minutes-per-question" name="minutes_per_question"
+             value="4" min="1" max="999" oninput="updateTotalTime()" />
+    </label>
+    {% if show_total_time %}
+    <span class="timer-total" id="timer-total"></span>
+    {% endif %}
+  </div>
+</div>
